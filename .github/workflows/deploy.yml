@@ -40,7 +40,7 @@ jobs:
     
     - run: touch ./src/main/resources/application.yml
     - run: echo "${{env.APPLICATION}}" > ./src/main/resources/application.yml
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application.yml
         path: ./src/main/resources/application.yml
