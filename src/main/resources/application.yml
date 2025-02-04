@@ -23,3 +23,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+openai:
+  model: gpt-4o
+  secret-key: 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
