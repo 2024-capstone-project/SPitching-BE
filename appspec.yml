@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: /build/libs/*.jar
+  - source: /
     destination: /home/ubuntu/app
     overwrite: yes
 
