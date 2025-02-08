@@ -8,6 +8,7 @@ spring:
       client:
         registration:
           google:
+            redirect-uri: https://spitching.store/login/oauth2/code/google
             client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
             client-secret: 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
             scope:
