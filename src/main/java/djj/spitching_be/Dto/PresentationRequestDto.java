@@ -13,5 +13,5 @@ public class PresentationRequestDto {
 
     private String description;
 
-    private Integer practice_count;
+    private Integer practiceCount;
 }

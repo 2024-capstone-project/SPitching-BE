@@ -4,13 +4,14 @@ import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Dto.PresentationListResponseDto;
 import djj.spitching_be.Dto.PresentationRequestDto;
 import djj.spitching_be.Dto.PresentationResponseDto;
+import djj.spitching_be.Dto.PresentationTitleUpdateRequestDto;
 import djj.spitching_be.Repository.PresentationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -25,17 +26,11 @@ public class PresentationService {
     }
 
     // 모든 발표 가져오기
-    public List<PresentationListResponseDto> findAllPresentation(){
-        try{
-            List<Presentation> presentationList = presentationRepository.findAll();
-            List<PresentationListResponseDto> responseDtoList = new ArrayList<>();
-            for (Presentation presentation : presentationList) {
-                responseDtoList.add(new PresentationListResponseDto(presentation));
-            }
-            return responseDtoList;
-        }catch (Exception e){
-        }
-        return null;
+    public List<PresentationListResponseDto> findAllPresentation() {
+        return presentationRepository.findAllByOrderByUpdatedAtDesc()
+                .stream()
+                .map(PresentationListResponseDto::new)
+                .collect(Collectors.toList());
     }
 
     // 발표 하나 가져오기
@@ -48,18 +43,18 @@ public class PresentationService {
 
     // 발표 수정 - 제목 수정
     @Transactional
-    public Long updatePresentation(Long id, PresentationRequestDto requestDto){
+    public String updatePresentation(Long id, PresentationTitleUpdateRequestDto requestDto) {
         Presentation presentation = presentationRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다.")
         );
-        presentation.update(requestDto);
-        return presentation.getId();
+        presentation.updateTitle(requestDto.getTitle());
+        return "Updated";
     }
 
     // 발표 삭제
     @Transactional
-    public Long deletePresentation(Long id){
+    public String deletePresentation(Long id){
         presentationRepository.deleteById(id);
-        return id;
+        return "Deleted";
     }
 }

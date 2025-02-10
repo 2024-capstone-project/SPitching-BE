@@ -17,16 +17,16 @@ import java.time.LocalDateTime;
 public class Timestamped {
     @CreatedDate
     @Column(updatable = false) // 생성 시에만 설정, 수정 불가
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = true) // 삭제되지 않은 경우 null
-    private LocalDateTime deleted_at;
+    private LocalDateTime deletedAt;
 
     // 삭제 시간을 설정하는 메서드 추가
     public void setDeletedAt() {
-        this.deleted_at = LocalDateTime.now(); // 현재 시간으로 설정
+        this.deletedAt = LocalDateTime.now(); // 현재 시간으로 설정
     }
 }

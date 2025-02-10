@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface PresentationRepository extends JpaRepository <Presentation, Long> {
-    List<PresentationListResponseDto> findAllByOrderByModifiedAtDesc();
+    List<Presentation> findAllByOrderByUpdatedAtDesc();
 
 }
