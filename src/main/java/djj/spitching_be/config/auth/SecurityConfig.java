@@ -49,9 +49,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/board/**","/pet/**", "/chat/**","/api/**").authenticated()
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health").permitAll()
-                        .anyRequest().authenticated()
+//                        .requestMatchers("/board/**","/pet/**", "/chat/**","/api/**").authenticated()
+//                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health").permitAll()
+//                        .anyRequest().authenticated()
+                          .requestMatchers("/**").permitAll() // ✅ 모든 요청을 로그인 없이 허용
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
