@@ -15,25 +15,25 @@ import java.util.Optional;
 public class PresentationListResponseDto {
     private String title;
     private String description;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
-    private LocalDateTime deleted_at;
-    private Integer practice_count;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    private Integer practiceCount;
 
     // entity -> dto
     public PresentationListResponseDto(Presentation presentation){
         this.title = presentation.getTitle();
         this.description = presentation.getDescription();
-        this.practice_count = presentation.getPractice_count(); // 추가
-        this.created_at = presentation.getCreated_at();
-        this.updated_at = presentation.getUpdated_at();
-        this.deleted_at = presentation.getDeleted_at();
+        this.practiceCount = presentation.getPracticeCount(); // 추가
+        this.createdAt = presentation.getCreatedAt();
+        this.updatedAt = presentation.getUpdatedAt();
+        this.deletedAt = presentation.getDeletedAt();
     }
 
     public PresentationListResponseDto(Optional<Presentation> presentation){
         this.title = presentation.get().getTitle();
-        this.created_at = presentation.get().getUpdated_at();
-        this.updated_at = presentation.get().getUpdated_at();
+        this.createdAt = presentation.get().getUpdatedAt();
+        this.updatedAt = presentation.get().getUpdatedAt();
     }
 
 

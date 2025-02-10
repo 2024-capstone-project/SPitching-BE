@@ -1,9 +1,8 @@
 package djj.spitching_be.Controller;
 
-import djj.spitching_be.Dto.PresentationListResponseDto;
-import djj.spitching_be.Dto.PresentationRequestDto;
-import djj.spitching_be.Dto.PresentationResponseDto;
+import djj.spitching_be.Dto.*;
 import djj.spitching_be.Service.PresentationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class PresentationController {
     }
 
     // 전체 발표 목록 조회
-    @GetMapping
+    @GetMapping("presentations/list")
     public List<PresentationListResponseDto> getAllPresentations(){
         return presentationService.findAllPresentation();
     }
@@ -37,14 +36,16 @@ public class PresentationController {
     }
 
     // 발표 수정 - 제목 수정
-    @PutMapping("/presentations/{id}")
-    public Long updatePresentation(@PathVariable Long id, @RequestBody PresentationRequestDto requestDto){
-        return presentationService.updatePresentation(id,requestDto);
+    @PatchMapping("/presentations/{id}")
+    public ResponseEntity<MessageResponseDto> updatePresentation(@PathVariable Long id, @RequestBody PresentationTitleUpdateRequestDto requestDto) {
+        String result = presentationService.updatePresentation(id, requestDto);  // String으로 받음
+        return ResponseEntity.ok(new MessageResponseDto(result));
     }
 
     // 발표 삭제
     @DeleteMapping("/presentations/{id}")
-    public Long deletePresentation(@PathVariable Long id){
-        return presentationService.deletePresentation(id);
+    public ResponseEntity<MessageResponseDto> deletePresentation(@PathVariable Long id){
+        String result = presentationService.deletePresentation(id);
+        return ResponseEntity.ok(new MessageResponseDto(result));
     }
 }

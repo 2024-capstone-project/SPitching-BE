@@ -20,23 +20,27 @@ public class Presentation extends Timestamped{
     private String title;
 
     // 발표 묶음 내용
-    @Column(nullable = false)
     private String description;
 
     // 연습 횟수
-    private Integer practice_count;
+    private Integer practiceCount;
 
     // requestDto 정보를 가져와서 entity 만들 때 사용
     public Presentation(PresentationRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.description = requestDto.getDescription();
-        this.practice_count = requestDto.getPractice_count();
+        this.practiceCount = requestDto.getPracticeCount();
     }
 
     // 업데이트 메소드
     public void update(PresentationRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.description = requestDto.getDescription();
-        this.practice_count = requestDto.getPractice_count();
+        this.practiceCount = requestDto.getPracticeCount();
+    }
+
+    // 발표 수정 전용 메소드
+    public void updateTitle(String title) {
+        this.title = title;
     }
 }
