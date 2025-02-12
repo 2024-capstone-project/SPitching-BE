@@ -3,18 +3,18 @@ spring:
     url: jdbc:mysql://djj-rds.cjs2e2s6ov0a.ap-northeast-2.rds.amazonaws.com:3306/djj?createDatabaseIfNotExist=true&characterEncoding=UTF-8&characterSetResults=UTF-8
     username: admin
     password: capstone0!
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
-            client-secret: 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
-            scope:
-              - email
-              - profile
-              - openid
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            redirect-uri: http://localhost:8080/login/oauth2/code/google
+#            client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
+#            client-secret: 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
+#            scope:
+#              - email
+#              - profile
+#              - openid
   jpa: #띄어쓰기 2칸
     database-platform: org.hibernate.dialect.MySQLDialect  # Dialect 명시적 설정
     hibernate: #띄어쓰기 4칸
