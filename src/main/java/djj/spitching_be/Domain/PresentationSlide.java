@@ -18,7 +18,7 @@ public class PresentationSlide {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="presentaion_id")
+    @JoinColumn(name="presentation_id")
     private Presentation presentation; // 특정 발표 연습과 연결됨
 
     private Integer slideNumber;  // 슬라이드 번호

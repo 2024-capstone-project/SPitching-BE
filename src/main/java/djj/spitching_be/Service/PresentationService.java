@@ -1,5 +1,7 @@
 package djj.spitching_be.Service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
 import djj.spitching_be.Dto.PresentationListResponseDto;
@@ -12,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,12 +31,18 @@ import java.util.stream.Collectors;
 public class PresentationService {
     private final PresentationRepository presentationRepository;
     private final PresentationSlideRepository slideRepository;
+    private final AmazonS3 amazonS3Client;
 
-    private final String UPLOAD_DIR = "uploads/"; // 로컬 저장소 경로 (S3 사용 시 변경 필요)
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
-    public PresentationService(PresentationRepository presentationRepository, PresentationSlideRepository slideRepository) {
+    public PresentationService(
+            PresentationRepository presentationRepository,
+            PresentationSlideRepository slideRepository,
+            AmazonS3 amazonS3Client) {
         this.presentationRepository = presentationRepository;
         this.slideRepository = slideRepository;
+        this.amazonS3Client = amazonS3Client;
     }
 
     // 발표 생성
@@ -81,27 +90,47 @@ public class PresentationService {
         Presentation presentation = presentationRepository.findById(presentationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 발표 연습이 존재하지 않습니다."));
 
-        File pdfFile = new File(UPLOAD_DIR + file.getOriginalFilename());
-        file.transferTo(pdfFile);
+        // 임시 파일 생성
+        File tempFile = File.createTempFile("pdf-", ".pdf");
+        file.transferTo(tempFile);
 
-        try (PDDocument document = PDDocument.load(pdfFile)) {
+        try (PDDocument document = PDDocument.load(tempFile)) {
             PDFRenderer pdfRenderer = new PDFRenderer(document);
             List<PresentationSlide> slides = new ArrayList<>();
 
+            // PDF 파일을 S3에 업로드
+            String pdfKey = "presentations/" + presentationId + "/original.pdf";
+            amazonS3Client.putObject(new PutObjectRequest(bucketName, pdfKey, tempFile));
+
             for (int page = 0; page < document.getNumberOfPages(); page++) {
                 BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
-                String imagePath = UPLOAD_DIR + "presentation_" + presentationId + "_slide_" + (page + 1) + ".png";
-                ImageIO.write(bufferedImage, "PNG", new File(imagePath));
+
+                // 이미지를 임시 파일로 저장
+                File imageFile = File.createTempFile("slide-", ".png");
+                ImageIO.write(bufferedImage, "PNG", imageFile);
+
+                // 이미지를 S3에 업로드
+                String imageKey = "presentations/" + presentationId + "/slides/slide_" + (page + 1) + ".png";
+                amazonS3Client.putObject(new PutObjectRequest(bucketName, imageKey, imageFile));
+
+                // S3 URL 생성
+                String imageUrl = amazonS3Client.getUrl(bucketName, imageKey).toString();
 
                 // 슬라이드 엔터티 생성
                 PresentationSlide slide = new PresentationSlide();
                 slide.setPresentation(presentation);
                 slide.setSlideNumber(page + 1);
-                slide.setImageUrl(imagePath);
+                slide.setImageUrl(imageUrl);  // S3 URL 저장
                 slideRepository.save(slide);
 
                 slides.add(slide);
+
+                // 임시 이미지 파일 삭제
+                imageFile.delete();
             }
+
+            // 임시 PDF 파일 삭제
+            tempFile.delete();
 
             return slides;
         }

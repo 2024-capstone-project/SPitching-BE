@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController // json으로 데이터를 주고받음을 선언
 @RequestMapping("/api/v1")
@@ -54,12 +55,15 @@ public class PresentationController {
         return ResponseEntity.ok(new MessageResponseDto(result));
     }
 
-    // pdf 업로드
+    // Pdf 업로드
     @PostMapping("/presentations/{id}/upload")
     public ResponseEntity<?> uploadPdf(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
             List<PresentationSlide> slides = presentationService.uploadAndConvertPdf(id, file);
-            return ResponseEntity.ok(slides);
+            List<PresentationSlideDto> slideDtos = slides.stream()
+                    .map(PresentationSlideDto::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(slideDtos);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("PDF 변환 실패: " + e.getMessage());
         }
@@ -67,7 +71,10 @@ public class PresentationController {
 
     // 특정 발표 연습의 슬라이드 조회
     @GetMapping("/presentations/{id}/slides")
-    public List<PresentationSlide> getSlides(@PathVariable Long id){
-        return slideRepository.findByPresentationId(id);
+    public List<PresentationSlideDto> getSlides(@PathVariable Long id) {
+        return slideRepository.findByPresentationId(id)
+                .stream()
+                .map(PresentationSlideDto::new)
+                .collect(Collectors.toList());
     }
 }
