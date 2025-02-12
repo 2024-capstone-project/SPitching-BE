@@ -1,22 +1,40 @@
 package djj.spitching_be.Service;
 
 import djj.spitching_be.Domain.Presentation;
+import djj.spitching_be.Domain.PresentationSlide;
 import djj.spitching_be.Dto.PresentationListResponseDto;
 import djj.spitching_be.Dto.PresentationRequestDto;
 import djj.spitching_be.Dto.PresentationResponseDto;
 import djj.spitching_be.Dto.PresentationTitleUpdateRequestDto;
 import djj.spitching_be.Repository.PresentationRepository;
+import djj.spitching_be.Repository.PresentationSlideRepository;
 import lombok.AllArgsConstructor;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class PresentationService {
     private final PresentationRepository presentationRepository;
+    private final PresentationSlideRepository slideRepository;
+
+    private final String UPLOAD_DIR = "uploads/"; // 로컬 저장소 경로 (S3 사용 시 변경 필요)
+
+    public PresentationService(PresentationRepository presentationRepository, PresentationSlideRepository slideRepository) {
+        this.presentationRepository = presentationRepository;
+        this.slideRepository = slideRepository;
+    }
 
     // 발표 생성
     public PresentationResponseDto createPresentation(PresentationRequestDto requestDto){
@@ -56,5 +74,36 @@ public class PresentationService {
     public String deletePresentation(Long id){
         presentationRepository.deleteById(id);
         return "Deleted";
+    }
+
+    public List<PresentationSlide> uploadAndConvertPdf(Long presentationId, MultipartFile file) throws IOException {
+        // 해당 ID의 발표 연습을 찾음
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 발표 연습이 존재하지 않습니다."));
+
+        File pdfFile = new File(UPLOAD_DIR + file.getOriginalFilename());
+        file.transferTo(pdfFile);
+
+        try (PDDocument document = PDDocument.load(pdfFile)) {
+            PDFRenderer pdfRenderer = new PDFRenderer(document);
+            List<PresentationSlide> slides = new ArrayList<>();
+
+            for (int page = 0; page < document.getNumberOfPages(); page++) {
+                BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
+                String imagePath = UPLOAD_DIR + "presentation_" + presentationId + "_slide_" + (page + 1) + ".png";
+                ImageIO.write(bufferedImage, "PNG", new File(imagePath));
+
+                // 슬라이드 엔터티 생성
+                PresentationSlide slide = new PresentationSlide();
+                slide.setPresentation(presentation);
+                slide.setSlideNumber(page + 1);
+                slide.setImageUrl(imagePath);
+                slideRepository.save(slide);
+
+                slides.add(slide);
+            }
+
+            return slides;
+        }
     }
 }
