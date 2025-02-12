@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,7 +21,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(Arrays.asList(
@@ -31,7 +30,19 @@ public class SecurityConfig {
                 "https://www.spitching.store"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -43,13 +54,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .requiresChannel(channel -> channel
+                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                        .requiresSecure()
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/board/**","/pet/**", "/chat/**","/api/**").authenticated()
-//                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health").permitAll()
-//                        .anyRequest().authenticated()
-                          .requestMatchers("/**").permitAll() // ✅ 모든 요청을 로그인 없이 허용
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health").permitAll()
+                        .requestMatchers("/board/**", "/pet/**", "/chat/**", "/api/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
@@ -58,10 +72,15 @@ public class SecurityConfig {
                             SecurityContextHolder.getContext().setAuthentication(authentication);
                             request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-                            // 프로덕션과 로컬 환경에 따른 리다이렉트 URI 분기
-                            String redirectUri = request.getServerName().contains("localhost")
+                            String scheme = request.getHeader("X-Forwarded-Proto");
+                            if (scheme == null) {
+                                scheme = request.getScheme();
+                            }
+                            String serverName = request.getServerName();
+
+                            String redirectUri = serverName.contains("localhost")
                                     ? "http://localhost:8080/loginSuccess"
-                                    : "https://spitching.store/loginSuccess";
+                                    : scheme + "://" + serverName + "/loginSuccess";
 
                             response.sendRedirect(redirectUri);
                         }))
@@ -73,9 +92,15 @@ public class SecurityConfig {
                         .permitAll()
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpStatus.OK.value());
-                            String origin = request.getServerName().contains("localhost")
+                            String scheme = request.getHeader("X-Forwarded-Proto");
+                            if (scheme == null) {
+                                scheme = request.getScheme();
+                            }
+                            String serverName = request.getServerName();
+                            String origin = serverName.contains("localhost")
                                     ? "http://localhost:3000"
-                                    : "https://spitching.store";
+                                    : scheme + "://" + serverName;
+
                             response.setHeader("Access-Control-Allow-Origin", origin);
                             response.setHeader("Access-Control-Allow-Credentials", "true");
                             response.getWriter().write("Logout successful");
