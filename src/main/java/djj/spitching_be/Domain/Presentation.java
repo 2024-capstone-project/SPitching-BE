@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +26,10 @@ public class Presentation extends Timestamped{
 
     // 연습 횟수
     private Integer practiceCount;
+
+    // 하나의 발표 연습은 여러 개의 슬라이드를 가질 수 있음
+    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
+    private List<PresentationSlide> slides;
 
     // requestDto 정보를 가져와서 entity 만들 때 사용
     public Presentation(PresentationRequestDto requestDto) {

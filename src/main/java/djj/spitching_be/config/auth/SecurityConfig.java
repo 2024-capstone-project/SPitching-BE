@@ -61,7 +61,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health").permitAll()
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/health", "/api/v1/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/presentations/*/upload",  // ✅ PDF 업로드 허용
+                                "/api/v1/presentations/*/slides",  // ✅ 슬라이드 조회 허용
+                                "/api/v1/slides/*/script"          // ✅ 대본 저장 허용
+                        ).permitAll()
                         .requestMatchers("/board/**", "/pet/**", "/chat/**", "/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
