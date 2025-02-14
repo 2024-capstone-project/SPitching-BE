@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class TagRequestDto {
     private String content;
-    private Long slideId;
+//    private Long slideId;
 }
