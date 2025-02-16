@@ -1,19 +1,25 @@
 package djj.spitching_be.Controller;
 
+import djj.spitching_be.Domain.PresentationSlide;
 import djj.spitching_be.Dto.*;
+import djj.spitching_be.Repository.PresentationSlideRepository;
 import djj.spitching_be.Service.PresentationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController // json으로 데이터를 주고받음을 선언
 @RequestMapping("/api/v1")
 public class PresentationController {
     private final PresentationService presentationService;
-
-    public PresentationController(PresentationService presentationService){
+    private final PresentationSlideRepository slideRepository;
+    public PresentationController(PresentationService presentationService, PresentationSlideRepository slideRepository){
         this.presentationService = presentationService;
+        this.slideRepository = slideRepository;
     }
 
     // 발표 생성
@@ -47,5 +53,28 @@ public class PresentationController {
     public ResponseEntity<MessageResponseDto> deletePresentation(@PathVariable Long id){
         String result = presentationService.deletePresentation(id);
         return ResponseEntity.ok(new MessageResponseDto(result));
+    }
+
+    // Pdf 업로드
+    @PostMapping("/presentations/{id}/upload")
+    public ResponseEntity<?> uploadPdf(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            List<PresentationSlide> slides = presentationService.uploadAndConvertPdf(id, file);
+            List<PresentationSlideDto> slideDtos = slides.stream()
+                    .map(PresentationSlideDto::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(slideDtos);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("PDF 변환 실패: " + e.getMessage());
+        }
+    }
+
+    // 특정 발표 연습의 슬라이드 조회
+    @GetMapping("/presentations/{id}/slides")
+    public List<PresentationSlideDto> getSlides(@PathVariable Long id) {
+        return slideRepository.findByPresentationId(id)
+                .stream()
+                .map(PresentationSlideDto::new)
+                .collect(Collectors.toList());
     }
 }
