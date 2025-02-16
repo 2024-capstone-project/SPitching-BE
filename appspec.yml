@@ -11,6 +11,12 @@ permissions:
     group: ubuntu
     mode: 755
 
+  - object: /home/ubuntu/app/scripts
+    pattern: "*.sh"
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+
 hooks:
   BeforeInstall:
     - location: scripts/stop.sh
