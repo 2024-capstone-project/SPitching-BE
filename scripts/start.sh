@@ -9,6 +9,10 @@ DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
 
 TIME_NOW=$(date +%c)
 
+# 추가된 부분: 디버깅을 위한 로그. build 디렉토리 확인
+echo "$TIME_NOW > Checking build/libs directory:" >> $DEPLOY_LOG
+ls -la $PROJECT_ROOT/build/libs >> $DEPLOY_LOG
+
 # build 파일 복사
 echo "$TIME_NOW > $JAR_FILE 파일 복사" >> $DEPLOY_LOG
 # cp $PROJECT_ROOT/build/libs/*.jar $JAR_FILE
