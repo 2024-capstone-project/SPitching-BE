@@ -1,8 +1,11 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /home/ubuntu/app
+  - source: /build/libs
+    destination: /home/ubuntu/app/build/libs
+    overwrite: yes
+  - source: /scripts
+    destination: /home/ubuntu/app/scripts
     overwrite: yes
 
 permissions:
@@ -10,7 +13,6 @@ permissions:
     owner: ubuntu
     group: ubuntu
     mode: 755
-
   - object: /home/ubuntu/app/scripts
     pattern: "*.sh"
     owner: ubuntu
