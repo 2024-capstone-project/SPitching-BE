@@ -85,6 +85,7 @@ public class PresentationService {
         return "Deleted";
     }
 
+    // pdf 업로드 후 각 장을 png화
     public List<PresentationSlide> uploadAndConvertPdf(Long presentationId, MultipartFile file) throws IOException {
         // 해당 ID의 발표 연습을 찾음
         Presentation presentation = presentationRepository.findById(presentationId)
