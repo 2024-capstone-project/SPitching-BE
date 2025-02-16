@@ -3,28 +3,50 @@ spring:
     url: jdbc:mysql://djj-rds.cjs2e2s6ov0a.ap-northeast-2.rds.amazonaws.com:3306/djj?createDatabaseIfNotExist=true&characterEncoding=UTF-8&characterSetResults=UTF-8
     username: admin
     password: capstone0!
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            redirect-uri: http://localhost:8080/login/oauth2/code/google
-#            client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
-#            client-secret: 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
-#            scope:
-#              - email
-#              - profile
-#              - openid
-  jpa: #띄어쓰기 2칸
-    database-platform: org.hibernate.dialect.MySQLDialect  # Dialect 명시적 설정
-    hibernate: #띄어쓰기 4칸
-      ddl-auto: update #띄어쓰기 6칸
-    generate-ddl: true #띄어쓰기 4칸
-    show-sql: true #띄어쓰기 4칸
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: https://spitching.store/login/oauth2/code/google
+            client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+              - openid
+    require-ssl: true  # HTTPS 강제
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+server:
+  ssl:
+    enabled: false  # ALB에서 SSL을 처리하므로 false
+  forward-headers-strategy: NATIVE  # 프록시 헤더 처리
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
 openai:
   model: gpt-4o
   secret-key: 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
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAWOOXT3JR54VR77VJ
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: djj-github-actions-s3-bucket
