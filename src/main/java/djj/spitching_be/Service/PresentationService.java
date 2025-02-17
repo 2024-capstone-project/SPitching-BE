@@ -4,12 +4,14 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
+import djj.spitching_be.Domain.User;
 import djj.spitching_be.Dto.PresentationListResponseDto;
 import djj.spitching_be.Dto.PresentationRequestDto;
 import djj.spitching_be.Dto.PresentationResponseDto;
 import djj.spitching_be.Dto.PresentationTitleUpdateRequestDto;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.PresentationSlideRepository;
+import djj.spitching_be.Repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class PresentationService {
     private final PresentationRepository presentationRepository;
     private final PresentationSlideRepository slideRepository;
+    private final UserRepository userRepository;
     private final AmazonS3 amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -39,20 +42,30 @@ public class PresentationService {
     public PresentationService(
             PresentationRepository presentationRepository,
             PresentationSlideRepository slideRepository,
-            AmazonS3 amazonS3Client) {
+            AmazonS3 amazonS3Client,
+            UserRepository userRepository) {
         this.presentationRepository = presentationRepository;
         this.slideRepository = slideRepository;
         this.amazonS3Client = amazonS3Client;
+        this.userRepository = userRepository;
     }
 
     // 발표 생성
-    public PresentationResponseDto createPresentation(PresentationRequestDto requestDto){
-        Presentation presentation = new Presentation(requestDto);
-        presentationRepository.save(presentation);
-        return new PresentationResponseDto(presentation);
+    @Transactional
+    public Presentation createPresentation(PresentationRequestDto requestDto, String userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Presentation presentation = new Presentation(requestDto, user);
+        return presentationRepository.save(presentation);
     }
 
-    // 모든 발표 가져오기
+    // 특정 사용자의 발표 목록 조회
+    public List<Presentation> getUserPresentations(String userId) {
+        return presentationRepository.findByUserId(userId);
+    }
+
+    // 모든 발표 가져오기 - 삭제 예정
     public List<PresentationListResponseDto> findAllPresentation() {
         return presentationRepository.findAllByOrderByUpdatedAtDesc()
                 .stream()

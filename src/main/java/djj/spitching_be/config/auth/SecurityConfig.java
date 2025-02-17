@@ -3,9 +3,11 @@ package djj.spitching_be.config.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,49 +18,36 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // 모든 요청 허용
+                .csrf(AbstractHttpConfigurer::disable)
+                .securityMatcher("/api/v1/**", "/login/**", "/oauth2/**")
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/v1/**").authenticated()
+                        .requestMatchers("/login", "/loginSuccess", "/health").permitAll()
+                        .requestMatchers("/", "/css/**", "/images/**", "/js/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/loginSuccess")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
                 );
 
         return http.build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "https://spitching.store",
-                "https://www.spitching.store"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
-        configuration.setExposedHeaders(Arrays.asList(
-                "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Credentials"
-        ));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/health", "/h2-console/**");
     }
 }
