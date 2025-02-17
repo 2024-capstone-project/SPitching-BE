@@ -13,19 +13,25 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
 @Service
-@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = super.loadUser(userRequest);
+    public CustomOAuth2UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+        System.out.println("=== CustomOAuth2UserService Loaded ===");
+    }
 
-        // 1. 구글에서 가져온 정보 로깅
+    @Override
+    @Transactional
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("=== loadUser() method called ===");
+
+        OAuth2User oauth2User = super.loadUser(userRequest);
         System.out.println("=== OAuth2User Attributes ===");
         System.out.println(oauth2User.getAttributes());
 
@@ -33,26 +39,29 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = oauth2User.getAttribute("name");
         String picture = oauth2User.getAttribute("picture");
 
-        // 2. 정보 추출 확인 로깅
-        System.out.println("=== Extracted User Info ===");
         System.out.println("Email: " + email);
         System.out.println("Name: " + name);
         System.out.println("Picture: " + picture);
 
         try {
+            System.out.println("=== Checking if user exists ===");
             User user = userRepository.findByEmail(email)
-                    .map(entity -> entity.update(name, picture))
-                    .orElse(User.builder()
-                            .name(name)
-                            .email(email)
-                            .picture(picture)
-                            .role(Role.USER)
-                            .build());
+                    .map(entity -> {
+                        System.out.println("=== Existing user found, updating... ===");
+                        entity.update(name, picture);
+                        return userRepository.save(entity);
+                    })
+                    .orElseGet(() -> {
+                        System.out.println("=== No existing user found, creating new user... ===");
+                        return userRepository.save(User.builder()
+                                .name(name)
+                                .email(email)
+                                .picture(picture)
+                                .role(Role.USER)
+                                .build());
+                    });
 
-            // 3. 저장 시도 로깅
-            System.out.println("=== Trying to save user ===");
-            User savedUser = userRepository.save(user);
-            System.out.println("User saved successfully: " + savedUser.getEmail());
+            System.out.println("=== User saved successfully: " + user.getEmail() + " ===");
 
             return new DefaultOAuth2User(
                     Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
@@ -60,7 +69,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     "email"
             );
         } catch (Exception e) {
-            // 4. 에러 발생 시 로깅
             System.out.println("=== Error saving user ===");
             e.printStackTrace();
             throw e;
