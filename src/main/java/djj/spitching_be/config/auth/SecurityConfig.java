@@ -25,6 +25,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("SecurityConfig: CustomOAuth2UserService = " + customOAuth2UserService); // 로그 추가
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 추가
                 .csrf(AbstractHttpConfigurer::disable)
