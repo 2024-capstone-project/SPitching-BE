@@ -52,8 +52,8 @@ public class PresentationService {
 
     // 발표 생성
     @Transactional
-    public Presentation createPresentation(PresentationRequestDto requestDto, String userId){
-        User user = userRepository.findById(userId)
+    public Presentation createPresentation(PresentationRequestDto requestDto, String email){
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Presentation presentation = new Presentation(requestDto, user);
@@ -61,8 +61,8 @@ public class PresentationService {
     }
 
     // 특정 사용자의 발표 목록 조회
-    public List<Presentation> getUserPresentations(String userId) {
-        return presentationRepository.findByUserId(userId);
+    public List<Presentation> getUserPresentations(String email) {
+        return presentationRepository.findByUserEmail(email);
     }
 
     // 모든 발표 가져오기 - 삭제 예정
