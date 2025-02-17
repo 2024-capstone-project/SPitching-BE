@@ -28,14 +28,21 @@ public class Presentation extends Timestamped{
     private Integer practiceCount;
 
     // 하나의 발표 연습은 여러 개의 슬라이드를 가질 수 있음
+    // CascadeType.ALL 덕분에, 부모 엔티티에 따라 자식 엔티티도 다 수정/삭제됨.
     @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
     private List<PresentationSlide> slides;
 
+    // 하나의 유저는 여러 발표 연습을 가질 수 있다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name= "user_id", nullable = false)
+    private User user;
+
     // requestDto 정보를 가져와서 entity 만들 때 사용
-    public Presentation(PresentationRequestDto requestDto) {
+    public Presentation(PresentationRequestDto requestDto, User user) {
         this.title = requestDto.getTitle();
         this.description = requestDto.getDescription();
         this.practiceCount = requestDto.getPracticeCount();
+        this.user= user;
     }
 
     // 업데이트 메소드
