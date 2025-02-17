@@ -25,30 +25,45 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
 
-        // 디버깅을 위한 로그 추가
-        System.out.println("OAuth2User attributes: " + oauth2User.getAttributes());
+        // 1. 구글에서 가져온 정보 로깅
+        System.out.println("=== OAuth2User Attributes ===");
+        System.out.println(oauth2User.getAttributes());
 
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String picture = oauth2User.getAttribute("picture");
 
-        User user = userRepository.findByEmail(email)
-                .map(entity -> entity.update(name, picture))
-                .orElse(User.builder()
-                        .name(name)
-                        .email(email)
-                        .picture(picture)
-                        .role(Role.USER)
-                        .build());
+        // 2. 정보 추출 확인 로깅
+        System.out.println("=== Extracted User Info ===");
+        System.out.println("Email: " + email);
+        System.out.println("Name: " + name);
+        System.out.println("Picture: " + picture);
 
-        // 저장 확인을 위한 로그
-        User savedUser = userRepository.save(user);
-        System.out.println("Saved user: " + savedUser.getEmail());
+        try {
+            User user = userRepository.findByEmail(email)
+                    .map(entity -> entity.update(name, picture))
+                    .orElse(User.builder()
+                            .name(name)
+                            .email(email)
+                            .picture(picture)
+                            .role(Role.USER)
+                            .build());
 
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
-                oauth2User.getAttributes(),
-                "email"  // nameAttributeKey를 "email"로 설정
-        );
+            // 3. 저장 시도 로깅
+            System.out.println("=== Trying to save user ===");
+            User savedUser = userRepository.save(user);
+            System.out.println("User saved successfully: " + savedUser.getEmail());
+
+            return new DefaultOAuth2User(
+                    Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
+                    oauth2User.getAttributes(),
+                    "email"
+            );
+        } catch (Exception e) {
+            // 4. 에러 발생 시 로깅
+            System.out.println("=== Error saving user ===");
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
