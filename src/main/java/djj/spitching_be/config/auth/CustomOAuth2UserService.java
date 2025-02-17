@@ -1,6 +1,7 @@
 package djj.spitching_be.config.auth;
 
 
+import djj.spitching_be.Domain.Role;
 import djj.spitching_be.Domain.User;
 import djj.spitching_be.Repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,26 +25,30 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+        // 디버깅을 위한 로그 추가
+        System.out.println("OAuth2User attributes: " + oauth2User.getAttributes());
 
-        OAuthAttributes attributes = OAuthAttributes.of(registrationId,
-                userNameAttributeName, oauth2User.getAttributes());
+        String email = oauth2User.getAttribute("email");
+        String name = oauth2User.getAttribute("name");
+        String picture = oauth2User.getAttribute("picture");
 
-        User user = saveOrUpdate(attributes);
+        User user = userRepository.findByEmail(email)
+                .map(entity -> entity.update(name, picture))
+                .orElse(User.builder()
+                        .name(name)
+                        .email(email)
+                        .picture(picture)
+                        .role(Role.USER)
+                        .build());
+
+        // 저장 확인을 위한 로그
+        User savedUser = userRepository.save(user);
+        System.out.println("Saved user: " + savedUser.getEmail());
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
-                attributes.getAttributes(),
-                attributes.getNameAttributeKey());
-    }
-
-    private User saveOrUpdate(OAuthAttributes attributes) {
-        User user = userRepository.findByEmail(attributes.getEmail())
-                .map(entity -> entity.update(attributes.getName(), attributes.getPicture()))
-                .orElse(attributes.toEntity());
-
-        return userRepository.save(user);
+                oauth2User.getAttributes(),
+                "email"  // nameAttributeKey를 "email"로 설정
+        );
     }
 }
