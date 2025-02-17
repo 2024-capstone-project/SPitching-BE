@@ -33,6 +33,9 @@ public class User {
     @Column(nullable = false)
     private String picture;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Presentation> presentations = new ArrayList<>();
+
     @Builder
     public User(String id, String name, String email, Role role, String picture) {
         this.id = id;

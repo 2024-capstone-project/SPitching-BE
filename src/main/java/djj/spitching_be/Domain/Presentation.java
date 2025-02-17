@@ -31,11 +31,17 @@ public class Presentation extends Timestamped{
     @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
     private List<PresentationSlide> slides;
 
+    // 하나의 유저는 여러 발표 연습을 가질 수 있다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name= "user_id", nullable = false)
+    private User user;
+
     // requestDto 정보를 가져와서 entity 만들 때 사용
-    public Presentation(PresentationRequestDto requestDto) {
+    public Presentation(PresentationRequestDto requestDto, User user) {
         this.title = requestDto.getTitle();
         this.description = requestDto.getDescription();
         this.practiceCount = requestDto.getPracticeCount();
+        this.user= user;
     }
 
     // 업데이트 메소드

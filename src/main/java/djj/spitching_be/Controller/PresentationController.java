@@ -1,10 +1,13 @@
 package djj.spitching_be.Controller;
 
+import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
 import djj.spitching_be.Dto.*;
 import djj.spitching_be.Repository.PresentationSlideRepository;
 import djj.spitching_be.Service.PresentationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,12 +27,20 @@ public class PresentationController {
 
     // 발표 생성
     @PostMapping("/presentations")
-    public PresentationResponseDto createPresentation(@RequestBody PresentationRequestDto requestDto){
-        PresentationResponseDto presentation = presentationService.createPresentation(requestDto);
-        return presentation;
+    public ResponseEntity<Presentation> createPresentation(@RequestBody PresentationRequestDto requestDto,
+                                                      @AuthenticationPrincipal UserDetails userDetails){
+        Presentation presentation = presentationService.createPresentation(requestDto, userDetails.getUsername());
+        return ResponseEntity.ok(presentation);
     }
 
-    // 전체 발표 목록 조회
+    @GetMapping("/presentations/my")
+    public ResponseEntity<List<Presentation>> getMyPresentations(
+            @AuthenticationPrincipal UserDetails userDetails){
+        List<Presentation> presentations = presentationService.getUserPresentations(userDetails.getUsername());
+        return ResponseEntity.ok(presentations);
+    }
+
+    // 전체 발표 목록 조회 - 삭제 예정
     @GetMapping("presentations/list")
     public List<PresentationListResponseDto> getAllPresentations(){
         return presentationService.findAllPresentation();
