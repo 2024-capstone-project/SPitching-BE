@@ -9,4 +9,6 @@ import java.util.List;
 public interface PresentationRepository extends JpaRepository <Presentation, Long> {
     List<Presentation> findAllByOrderByUpdatedAtDesc();
 
+    List<Presentation> findByUserId(String userId);
+
 }
