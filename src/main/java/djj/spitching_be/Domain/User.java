@@ -13,12 +13,16 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class User {
-    @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY) // 얘는 String과 함께 사용할 수 없음
-    private String id;
+//    @Id
+//    // @GeneratedValue(strategy = GenerationType.IDENTITY) // 얘는 String과 함께 사용할 수 없음
+//    private String id;
 
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 //    private List<Pet> pets = new ArrayList<>();
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -37,8 +41,7 @@ public class User {
     private List<Presentation> presentations = new ArrayList<>();
 
     @Builder
-    public User(String id, String name, String email, Role role, String picture) {
-        this.id = id;
+    public User(String name, String email, Role role, String picture) {
         this.name = name;
         this.email = email;
         this.role = role;
