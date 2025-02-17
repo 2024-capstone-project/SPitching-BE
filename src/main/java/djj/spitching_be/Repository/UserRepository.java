@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, String>{
+public interface UserRepository extends JpaRepository<User, Long>{
     Optional<User> findByEmail(String email); // 중복 가입 확인
 }
