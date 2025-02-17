@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -27,17 +29,19 @@ public class PresentationController {
 
     // 발표 생성
     @PostMapping("/presentations")
-    public ResponseEntity<Presentation> createPresentation(@RequestBody PresentationRequestDto requestDto,
-                                                      @AuthenticationPrincipal UserDetails userDetails){
-        Presentation presentation = presentationService.createPresentation(requestDto, userDetails.getUsername());
-        return ResponseEntity.ok(presentation);
+    public ResponseEntity<Presentation> createPresentation(
+            @RequestBody PresentationRequestDto requestDto,
+            @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        return ResponseEntity.ok(presentationService.createPresentation(requestDto, email));
     }
 
+    // 특정 사용자가 자신의 발표 연습 목록 조회하기
     @GetMapping("/presentations/my")
     public ResponseEntity<List<Presentation>> getMyPresentations(
-            @AuthenticationPrincipal UserDetails userDetails){  // @AuthenticationPrincipal : 현재 인증된 사용자의 정보를 가져온다.
-        List<Presentation> presentations = presentationService.getUserPresentations(userDetails.getUsername());
-        return ResponseEntity.ok(presentations);
+            @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        return ResponseEntity.ok(presentationService.getUserPresentations(email));
     }
 
     // 전체 발표 목록 조회 - 삭제 예정
