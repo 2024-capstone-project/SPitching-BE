@@ -35,7 +35,7 @@ public class PresentationController {
 
     @GetMapping("/presentations/my")
     public ResponseEntity<List<Presentation>> getMyPresentations(
-            @AuthenticationPrincipal UserDetails userDetails){
+            @AuthenticationPrincipal UserDetails userDetails){  // @AuthenticationPrincipal : 현재 인증된 사용자의 정보를 가져온다.
         List<Presentation> presentations = presentationService.getUserPresentations(userDetails.getUsername());
         return ResponseEntity.ok(presentations);
     }

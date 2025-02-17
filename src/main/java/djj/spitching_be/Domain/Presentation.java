@@ -28,6 +28,7 @@ public class Presentation extends Timestamped{
     private Integer practiceCount;
 
     // 하나의 발표 연습은 여러 개의 슬라이드를 가질 수 있음
+    // CascadeType.ALL 덕분에, 부모 엔티티에 따라 자식 엔티티도 다 수정/삭제됨.
     @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
     private List<PresentationSlide> slides;
 
