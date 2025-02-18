@@ -29,11 +29,12 @@ public class PresentationController {
 
     // 발표 생성
     @PostMapping("/presentations")
-    public ResponseEntity<Presentation> createPresentation(
+    public ResponseEntity<PresentationResponseDto> createPresentation(
             @RequestBody PresentationRequestDto requestDto,
             @AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
-        return ResponseEntity.ok(presentationService.createPresentation(requestDto, email));
+        Presentation presentation = presentationService.createPresentation(requestDto, email);
+        return ResponseEntity.ok(new PresentationResponseDto(presentation));
     }
 
     // 특정 사용자가 자신의 발표 연습 목록 조회하기
