@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class Presentation extends Timestamped{
     @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
     private List<PresentationSlide> slides;
 
+    @JsonIgnore
     // 하나의 유저는 여러 발표 연습을 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "user_id", nullable = false)

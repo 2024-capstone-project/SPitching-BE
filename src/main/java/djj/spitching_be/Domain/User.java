@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class User {
     @Column(nullable = false)
     private String picture;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Presentation> presentations = new ArrayList<>();
 
