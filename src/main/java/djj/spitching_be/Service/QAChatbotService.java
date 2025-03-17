@@ -33,7 +33,7 @@ public class QAChatbotService {
 
     private final WebClient webClient;
 
-    @Value("${openai.api.key}")
+    @Value("${openai.secret-key}")
     private String openaiApiKey;
 
     @Value("${openai.model}")
