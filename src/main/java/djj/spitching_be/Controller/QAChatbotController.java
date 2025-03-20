@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/presentations/{id}/qa-session")
+@RequestMapping("/api/v1/presentations/{presentationId}/qa-session")
 @RequiredArgsConstructor
 public class QAChatbotController {
 
