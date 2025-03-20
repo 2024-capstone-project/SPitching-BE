@@ -214,7 +214,8 @@ public class QAChatbotService {
         Map<String, String> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
         systemMessage.put("content", "당신은 발표를 듣고 있는 청중입니다. 발표자가 '질문 있으신가요?'라고 물었을 때, "
-                + "발표 내용을 바탕으로 자연스럽고 관련성 높은 질문을 생성하세요. "
+                + "발표 내용을 바탕으로 자연스럽고 관련성 높은 질문을 생성하세요." + "정중한 태도로 질문하되, 핵심을 관통하는 질문을 해주세요"
+                + "그리고 존댓말로 해주고, 발표 내용에서 좀 더 심화된 혹은 확장된 질문도 간간히 해주세요."
                 + "발표 주제: " + presentationTitle + "\n\n발표 내용: " + scriptContent);
 
         Map<String, String> userMessage = new HashMap<>();
