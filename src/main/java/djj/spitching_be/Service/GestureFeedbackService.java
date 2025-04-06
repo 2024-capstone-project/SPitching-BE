@@ -1,6 +1,8 @@
 package djj.spitching_be.Service;
 
 import djj.spitching_be.Domain.GestureData;
+import djj.spitching_be.Domain.Presentation;
+import djj.spitching_be.Domain.User;
 import djj.spitching_be.Dto.GestureDto;
 import djj.spitching_be.Repository.GestureRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +19,11 @@ public class GestureFeedbackService {
     private final GestureRepository gestureRepository;
 
     @Transactional
-    public void processGestureFeedback(GestureDto gestureDto){
-        // 사용자 ID는 나중에 필요할 경우 매개변수로 추가 가능
-        GestureData gestureData = convertToGestureData(gestureDto);
-        gestureRepository.save(gestureData);
-        log.info("Gesture data saved to db : {}", gestureData);
-    }
-
-    private GestureData convertToGestureData(GestureDto gestureDto){
-        return GestureData.builder()
+    public void saveGestureFeedback(GestureDto gestureDto, User user, Presentation presentation){
+        // DTO를 엔티티로 변환
+        GestureData gestureData = GestureData.builder()
+                .user(user)
+                .presentation(presentation)
                 .gestureScore(gestureDto.getGestureScore())
                 .straightScore(gestureDto.getStraight_score())
                 .explainScore(gestureDto.getExplain_score())
@@ -33,7 +31,12 @@ public class GestureFeedbackService {
                 .raisedScore(gestureDto.getRaised_score())
                 .faceScore(gestureDto.getFace_score())
                 .videoUrl(gestureDto.getVideoUrl())
-                .createdAt(LocalDateTime.now())
                 .build();
+
+        // 저장
+        gestureRepository.save(gestureData);
+
+        log.info("Gesture feedback saved for user {} and presentation {}",
+                user.getId(), presentation.getId());
     }
 }
