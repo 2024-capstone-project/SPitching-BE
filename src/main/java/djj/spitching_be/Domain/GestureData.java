@@ -31,5 +31,6 @@ public class GestureData {
 
     private LocalDateTime createdAt;
     private Long presentationId;
+    private Long userId;
 
 }
