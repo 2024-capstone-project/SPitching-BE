@@ -25,11 +25,11 @@ public class GestureFeedbackService {
                 .user(user)
                 .presentation(presentation)
                 .gestureScore(gestureDto.getGestureScore())
-                .straightScore(gestureDto.getStraight_score())
-                .explainScore(gestureDto.getExplain_score())
-                .crossedScore(gestureDto.getCrossed_score())
-                .raisedScore(gestureDto.getRaised_score())
-                .faceScore(gestureDto.getFace_score())
+                .straightScore(gestureDto.getStraightScore())
+                .explainScore(gestureDto.getExplainScore())
+                .crossedScore(gestureDto.getCrossedScore())
+                .raisedScore(gestureDto.getRaisedScore())
+                .faceScore(gestureDto.getFaceScore())
                 .videoUrl(gestureDto.getVideoUrl())
                 .build();
 
