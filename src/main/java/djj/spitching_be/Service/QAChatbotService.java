@@ -45,7 +45,7 @@ public class QAChatbotService {
         Presentation presentation = presentationRepository.findById(presentationId)
                 .orElseThrow(() -> new RuntimeException("프레젠테이션을 찾을 수 없습니다."));
 
-        List<PresentationSlide> slides = presentationSlideRepository.findByPresentationId(presentationId);
+        List<PresentationSlide> slides = presentationSlideRepository.findByPresentationId(presentationId); // 발표 연습을 가져옴
 
         if (slides.isEmpty()) {
             throw new RuntimeException("슬라이드가 없는 프레젠테이션입니다.");
@@ -172,7 +172,10 @@ public class QAChatbotService {
         // 시스템 메시지 추가
         Map<String, String> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
-        systemMessage.put("content", "당신은 발표를 듣고 있는 청중입니다. 발표 내용에 대해 질문하거나 답변에 반응하세요. 발표 내용: " + context.toString());
+        systemMessage.put("content", "당신은 발표를 듣고 있는 청중입니다. 발표 내용에 대해 질문하거나 답변에 반응하세요. " +
+                "\"발표 내용을 바탕으로 자연스럽고 관련성 높은 질문을 생성하세요.\" + " +
+                "\"정중한 태도로 질문하되, 핵심을 관통하는 질문을 해주세요\"\n" +
+                "                + \"그리고 존댓말로 해주고, 발표 내용에서 좀 더 심화된 혹은 확장된 질문도 간간히 해주세요.\"발표 내용: " + context.toString());
         messages.add(systemMessage);
 
         // 이전 대화 내역 추가
@@ -208,13 +211,15 @@ public class QAChatbotService {
         return botResponse;
     }
 
+    // 질문 있으신가요? 라고 화두를 던지는 용도
     private String generateQuestionWithOpenAI(String scriptContent, String presentationTitle) {
         List<Map<String, String>> messages = new ArrayList<>();
 
         Map<String, String> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
         systemMessage.put("content", "당신은 발표를 듣고 있는 청중입니다. 발표자가 '질문 있으신가요?'라고 물었을 때, "
-                + "발표 내용을 바탕으로 자연스럽고 관련성 높은 질문을 생성하세요. "
+                + "발표 내용을 바탕으로 자연스럽고 관련성 높은 질문을 생성하세요." + "정중한 태도로 질문하되, 핵심을 관통하는 질문을 해주세요"
+                + "그리고 존댓말로 해주고, 발표 내용에서 좀 더 심화된 혹은 확장된 질문도 간간히 해주세요."
                 + "발표 주제: " + presentationTitle + "\n\n발표 내용: " + scriptContent);
 
         Map<String, String> userMessage = new HashMap<>();
