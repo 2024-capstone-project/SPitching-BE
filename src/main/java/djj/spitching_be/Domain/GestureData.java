@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)  // 이 어노테이션 추가
 public class GestureData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +28,8 @@ public class GestureData {
     private int crossedScore;
     private int raisedScore;
     private int faceScore;
+
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(length = 255)
