@@ -10,10 +10,10 @@ public class GestureDto {
 
     // 제스처 분석 결과
     private int gestureScore;
-    private int straight_score;
-    private int explain_score;
-    private int crossed_score;
-    private int raised_score;
-    private int face_score;
+    private int straightScore;
+    private int explainScore;
+    private int crossedScore;
+    private int raisedScore;
+    private int faceScore;
     private String videoUrl;
 }
