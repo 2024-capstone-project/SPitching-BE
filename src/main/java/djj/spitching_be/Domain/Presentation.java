@@ -35,7 +35,7 @@ public class Presentation extends Timestamped{
 
     // 하나의 발표 연습은 여러 개의 발표 연습을 가질 수 있음
     // CascadeType.ALL 덕분에, 부모 엔티티에 따라 자식 엔티티도 다 수정/삭제됨.
-    @OneToMany(mappedBy = "prasentation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
     private List<Practice> practices;
 
     @JsonIgnore
