@@ -53,7 +53,7 @@ public class SecurityConfig {
                                 log.error("Error saving user", e);
                             }
 
-                            response.sendRedirect("/login/oauth2/code/google");
+                            response.sendRedirect("/loginSuccess");
                         })
                 );
 
