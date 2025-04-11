@@ -10,9 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PracticeService {
-    private PracticeRepository practiceRepository;
-    private PresentationRepository presentationRepository;
+    private final PracticeRepository practiceRepository;
+    private final PresentationRepository presentationRepository;
 
+    // 생성자 주입 방식
+    public PracticeService(PresentationRepository presentationRepository, PracticeRepository practiceRepository) {
+        this.presentationRepository = presentationRepository;
+        this.practiceRepository = practiceRepository;
+    }
     @Transactional
     public Practice createPractice(PracticeRequestDto requestDto, Presentation presentation) {
         // Practice 객체 생성 - 사용자가 입력한 practice_type과 duration 사용

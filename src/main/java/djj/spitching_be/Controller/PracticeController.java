@@ -17,13 +17,17 @@ import java.util.Map;
 
 @Slf4j
 @RestController // json으로 데이터를 주고받음을 선언
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/practice")
 public class PracticeController {
 
-    private final PresentationRepository presentationRepository;
-    private final PresentationService presentationService;
     private final PracticeService practiceService;
+    private final PresentationRepository presentationRepository;
+
+    // 생성자 주입 방식
+    public PracticeController(PracticeService practiceService, PresentationRepository presentationRepository) {
+        this.practiceService = practiceService;
+        this.presentationRepository = presentationRepository;
+    }
     @PostMapping("/start")
     public ResponseEntity<?> startPractice(@RequestBody PracticeRequestDto requestDto,
                                            @RequestParam Long presentationId){
