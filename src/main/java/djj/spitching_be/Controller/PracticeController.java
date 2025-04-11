@@ -7,6 +7,7 @@ import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Service.PracticeService;
 import djj.spitching_be.Service.PresentationService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +17,13 @@ import java.util.Map;
 
 @Slf4j
 @RestController // json으로 데이터를 주고받음을 선언
-@RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/practice")
 public class PracticeController {
 
-    private PresentationRepository presentationRepository;
-    private PresentationService presentationService;
-    private PracticeService practiceService;
+    private final PresentationRepository presentationRepository;
+    private final PresentationService presentationService;
+    private final PracticeService practiceService;
     @PostMapping("/start")
     public ResponseEntity<?> startPractice(@RequestBody PracticeRequestDto requestDto,
                                            @RequestParam Long presentationId){
