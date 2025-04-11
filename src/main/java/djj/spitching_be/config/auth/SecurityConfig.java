@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/images/**",
                                 "/js/**", "/h2-console/**", "/login",
-                                "/loginSuccess", "api/v1/feedback/gesture", "/api/login/google").permitAll()
+                                "/loginSuccess", "api/v1/feedback/gesture", "/api/v1/login/google").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
