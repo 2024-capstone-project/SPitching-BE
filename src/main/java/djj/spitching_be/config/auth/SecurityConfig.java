@@ -53,7 +53,7 @@ public class SecurityConfig {
                                 log.error("Error saving user", e);
                             }
 
-                            response.sendRedirect("https://spitching.vercel.app/login-success");
+                            response.sendRedirect("https://spitching.vercel.app");
                         })
                 );
 
