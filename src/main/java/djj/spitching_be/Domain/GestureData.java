@@ -45,6 +45,11 @@ public class GestureData {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // Practice 엔티티와의 관계
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practice_id", nullable = false)
+    private Practice practice;
+
     // 테이블 간의 관계
     // 1. 한 명의 유저는 여러 발표 연습을 가질 수 있다.
     // 2. 하나의 발표 연습은 여러 제스처 피드백 데이터와 연결이 되어있다.
