@@ -4,6 +4,7 @@ import djj.spitching_be.Domain.Practice;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.User;
 import djj.spitching_be.Dto.GestureDto;
+import djj.spitching_be.Dto.PracticeResponseDto;
 import djj.spitching_be.Repository.PracticeRepository;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.UserRepository;
@@ -11,6 +12,7 @@ import djj.spitching_be.Service.GestureFeedbackService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +60,26 @@ public class GestureFeedbackController {
         }catch (Exception e){
             log.error("Error processing gesture feedback", e);
             return ResponseEntity.internalServerError().body("Error processing feedback: " + e.getMessage());
+        }
+    }
+
+    // 특정 연습의 제스처 피드백 조회
+    @GetMapping("/practice/{practiceId}/gesture")
+    public ResponseEntity<?> getGestureFeedbackByPractice(@PathVariable Long practiceId) {
+        try {
+            // 연습 존재 여부 확인
+            if (!practiceRepository.existsById(practiceId)) {
+                return ResponseEntity.badRequest().body("Practice not found with ID: " + practiceId);
+            }
+
+            GestureDto gestureDto = gestureFeedbackService.getGestureFeedbackByPracticeId(practiceId);
+            return ResponseEntity.ok(gestureDto);
+        } catch (EntityNotFoundException e) {
+            log.error("Entity not found: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error retrieving gesture feedback", e);
+            return ResponseEntity.internalServerError().body("Error retrieving feedback: " + e.getMessage());
         }
     }
 

@@ -46,7 +46,7 @@ public class GestureData {
     private User user;
 
     // Practice 엔티티와의 관계
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "practice_id", nullable = false)
     private Practice practice;
 

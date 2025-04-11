@@ -1,8 +1,10 @@
 package djj.spitching_be.Dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class GestureDto {
     // 사용자 및 발표 ID (from AI 서버)
     private Long userId;
