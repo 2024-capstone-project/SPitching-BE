@@ -21,7 +21,7 @@ public class AuthController {
 
     @PostMapping("/google")
     public ResponseEntity<String> loginWithGoogle(@RequestBody Map<String, String> body, HttpServletRequest request) {
-        String accessToken = body.get("accessToken");
+        String accessToken = body.get("idToken");
         if (accessToken == null || accessToken.isEmpty()) {
             return ResponseEntity.badRequest().body("Access token is missing");
         }
