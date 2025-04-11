@@ -40,6 +40,7 @@ public class Practice extends Timestamped{
     public Practice(PracticeRequestDto requestDto, Presentation presentation){
         this.practice_type = requestDto.getPractice_type();
         this.duration = requestDto.getDuration();
+        this.presentation = presentation;
     }
 
     // 업데이트 메소드
