@@ -1,8 +1,10 @@
 package djj.spitching_be.Controller;
 
+import djj.spitching_be.Domain.Practice;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.User;
 import djj.spitching_be.Dto.GestureDto;
+import djj.spitching_be.Repository.PracticeRepository;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.UserRepository;
 import djj.spitching_be.Service.GestureFeedbackService;
@@ -21,6 +23,7 @@ public class GestureFeedbackController {
     private final GestureFeedbackService gestureFeedbackService;
     private final UserRepository userRepository;
     private final PresentationRepository presentationRepository;
+    private final PracticeRepository practiceRepository;
 
     @PostMapping("/gesture")
     public ResponseEntity<String> saveGestureFeedback(@RequestBody GestureDto gestureDto) {
@@ -36,13 +39,17 @@ public class GestureFeedbackController {
             Presentation presentation = presentationRepository.findById(gestureDto.getPresentationId())
                     .orElseThrow(() -> new EntityNotFoundException("Presentation not found with ID: " + gestureDto.getPresentationId()));
 
+            Practice practice = practiceRepository.findById(gestureDto.getPracticeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Practice not found with ID: " + gestureDto.getPracticeId()));
+
+
             // 소유자의 Id와 웹훅에서 받은 id를 비교
             if (!presentation.getUser().getId().equals(user.getId())){
                 return ResponseEntity.badRequest().body("User does not own this presentation");
             }
 
             // 제스처 피드백 저장
-            gestureFeedbackService.saveGestureFeedback(gestureDto, user, presentation);
+            gestureFeedbackService.saveGestureFeedback(gestureDto, user, presentation, practice);
 
             return ResponseEntity.ok("Gesture feedback saved successfully");
         }catch (EntityNotFoundException e){
