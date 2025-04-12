@@ -30,36 +30,37 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/images/**",
                                 "/js/**", "/h2-console/**", "/login",
                                 "/loginSuccess", "api/v1/feedback/gesture",
-                                "/api/v1/login/google", "/api/v1/logout", "/health","/error").permitAll()
+                                "/api/v1/login/google", "/api/v1/logout", "/health", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
 //                        .loginPage("/api/v1/login/google")
-                        .userInfoEndpoint(userInfo ->
-                                userInfo.userService(customOAuth2UserService)
-                        )
-                        .successHandler((request, response, authentication) -> {
-                            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-                            String email = oauth2User.getAttribute("email");
-                            String name = oauth2User.getAttribute("name");
-                            String picture = oauth2User.getAttribute("picture");
+                                .userInfoEndpoint(userInfo ->
+                                        userInfo.userService(customOAuth2UserService)
+                                )
+                                .successHandler((request, response, authentication) -> {
+                                    OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                                    String email = oauth2User.getAttribute("email");
+                                    String name = oauth2User.getAttribute("name");
+                                    String picture = oauth2User.getAttribute("picture");
 
-                            log.info("User Info - email: {}, name: {}", email, name);
+                                    log.info("User Info - email: {}, name: {}", email, name);
 
-                            // CustomOAuth2UserService를 직접 호출
-                            try {
-                                User user = customOAuth2UserService.saveOrUpdateUser(oauth2User);
-                                log.info("User saved/updated successfully: {}", user.getEmail());
-                            } catch (Exception e) {
-                                log.error("Error saving user", e);
-                            }
+                                    // CustomOAuth2UserService를 직접 호출
+                                    try {
+                                        User user = customOAuth2UserService.saveOrUpdateUser(oauth2User);
+                                        log.info("User saved/updated successfully: {}", user.getEmail());
+                                    } catch (Exception e) {
+                                        log.error("Error saving user", e);
+                                    }
 
-                            response.sendRedirect("https://spitching.vercel.app");
-                        })
+                                    response.sendRedirect("https://spitching.vercel.app");
+                                })
                 )
                 // 로그아웃
                 .logout(logout -> logout
@@ -78,5 +79,18 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://spitching.vercel.app"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
