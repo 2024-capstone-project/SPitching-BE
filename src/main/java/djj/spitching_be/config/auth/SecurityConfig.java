@@ -34,11 +34,11 @@ public class SecurityConfig {
                         .requestMatchers("/", "/css/**", "/images/**",
                                 "/js/**", "/h2-console/**", "/login",
                                 "/loginSuccess", "api/v1/feedback/gesture",
-                                "/api/v1/login/google", "/api/v1/logout").permitAll()
+                                "/api/v1/login/google", "/api/v1/logout", "/health","/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/login/google")
+//                        .loginPage("/api/v1/login/google")
                         .userInfoEndpoint(userInfo ->
                                 userInfo.userService(customOAuth2UserService)
                         )
