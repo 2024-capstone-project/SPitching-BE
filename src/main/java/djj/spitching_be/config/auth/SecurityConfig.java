@@ -63,7 +63,7 @@ public class SecurityConfig {
                 )
                 // 로그아웃
                 .logout(logout -> logout
-                        .logoutUrl("/api/v1/login/logout")
+                        .logoutUrl("/api/v1/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                             try {
