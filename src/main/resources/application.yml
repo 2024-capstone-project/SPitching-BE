@@ -42,6 +42,8 @@ server:
       cookie:
         same-site: none
         secure: true
+        max-age: 21600s  # 세션 쿠키 유효 기간 설정 (6시간)
+        timeout: 21600s    # 세션 타임아웃 설정 (6시간)
 openai:
   model: gpt-4o
   secret-key: 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
