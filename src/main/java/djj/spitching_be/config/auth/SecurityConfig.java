@@ -1,6 +1,7 @@
 package djj.spitching_be.config.auth;
 
 import djj.spitching_be.Domain.User;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,6 +15,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 import java.util.Arrays;
 
 @Configuration
@@ -30,7 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/images/**",
                                 "/js/**", "/h2-console/**", "/login",
-                                "/loginSuccess", "api/v1/feedback/gesture", "/api/v1/login/google").permitAll()
+                                "/loginSuccess", "api/v1/feedback/gesture",
+                                "/api/v1/login/google", "/api/v1/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -56,6 +60,21 @@ public class SecurityConfig {
 
                             response.sendRedirect("https://spitching.vercel.app");
                         })
+                )
+                // 로그아웃
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/login/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            try {
+                                response.getWriter().write("로그아웃 성공");
+                            } catch (IOException e) {
+                                log.error("로그아웃 응답 작성 중 오류", e);
+                            }
+                        })
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 );
 
         return http.build();
