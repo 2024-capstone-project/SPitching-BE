@@ -12,7 +12,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:5173",
-                        "https://spitching.vercel.app"
+                        "https://spitching.vercel.app",
+                        "https://spitching.store"
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
