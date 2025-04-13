@@ -2,6 +2,7 @@ package djj.spitching_be.config.auth;
 
 import djj.spitching_be.Domain.User;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -60,7 +61,12 @@ public class SecurityConfig {
                                         log.error("Error saving user", e);
                                     }
 
-                                    response.sendRedirect("https://spitching.vercel.app");
+                                    // 이 부분을 추가: 세션 ID를 URL 파라미터로 포함
+                                    HttpSession session = request.getSession(false);
+                                    String sessionId = session != null ? session.getId() : "";
+
+                                    // 리디렉션 URL에 세션 ID 추가
+                                    response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
                                 })
                 )
                 // 로그아웃
