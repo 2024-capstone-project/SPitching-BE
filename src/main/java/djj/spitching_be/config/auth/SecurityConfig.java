@@ -69,11 +69,12 @@ public class SecurityConfig {
                                     }
 
                                     // 이 부분을 추가: 세션 ID를 URL 파라미터로 포함
-                                    HttpSession session = request.getSession(false);
-                                    String sessionId = session != null ? session.getId() : "";
+//                                    HttpSession session = request.getSession(false);
+//                                    String sessionId = session != null ? session.getId() : "";
 
                                     // 리디렉션 URL에 세션 ID 추가
-                                    response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
+                                    //response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
+                                    response.sendRedirect("https://spitching.vercel.app");
                                 })
                 )
                 // 로그아웃
@@ -119,24 +120,23 @@ public class SecurityConfig {
 
                 filterChain.doFilter(request, response);
 
-                Collection<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
+                Collection<String> headers = response.getHeaders("Set-Cookie");
                 boolean firstHeader = true;
+
                 for (String header : headers) {
-                    if (header.contains("JSESSIONID")) {
-                        String updatedHeader = header + "; SameSite=None; Secure";
-                        if (firstHeader) {
-                            response.setHeader(HttpHeaders.SET_COOKIE, updatedHeader);
-                            firstHeader = false;
-                        } else {
-                            response.addHeader(HttpHeaders.SET_COOKIE, updatedHeader);
-                        }
+                    if (firstHeader) {
+                        response.setHeader("Set-Cookie", String.format("%s; SameSite=None; Secure", header));
+                        firstHeader = false;
+                    } else {
+                        response.addHeader("Set-Cookie", String.format("%s; SameSite=None; Secure", header));
                     }
                 }
             }
         });
 
-        registrationBean.setOrder(1); // 필터 순서 지정
+        registrationBean.setOrder(1);
         return registrationBean;
     }
+
 
 }
