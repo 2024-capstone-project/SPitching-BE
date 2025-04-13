@@ -7,16 +7,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins(
+//                        "http://localhost:5173",
+//                        "https://spitching.vercel.app",
+//                        "https://spitching.store"
+//                )
+//                .allowedMethods("*")
+//                .allowedHeaders("*")
+//                .allowCredentials(true);
+//    }
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:5173",
-                        "https://spitching.vercel.app",
-                        "https://spitching.store"
-                )
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowedOrigins("https://spitching.vercel.app") // 정확한 도메인만
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowCredentials(true); // 이거 있어야 쿠키 포함 가능
     }
 }
