@@ -74,7 +74,7 @@ public class SecurityConfig {
 
                                     // 리디렉션 URL에 세션 ID 추가
                                     //response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
-                                    response.sendRedirect("https://spitching.vercel.app");
+                                    response.sendRedirect("https://www.spitching.store/");
                                 })
                 )
                 // 로그아웃
