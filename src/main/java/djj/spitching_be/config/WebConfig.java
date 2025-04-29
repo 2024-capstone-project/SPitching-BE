@@ -23,7 +23,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://spitching.vercel.app", "http://localhost:5173") // 정확한 도메인만
+                .allowedOrigins("https://www.spitching.store",
+                        "https://spitching.store",
+                        "https://spitching.vercel.app",
+                        "http://localhost:5173") // 정확한 도메인만
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true); // 이거 있어야 쿠키 포함 가능
     }
