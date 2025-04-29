@@ -8,7 +8,7 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: '{baseUrl}/login/oauth2/code/google'
+            redirect-uri: https://api.spitching.store/login/oauth2/code/google
             client-id: 695216799862-bvldqikpusajbrc5972l2oj0jqe3jlqe.apps.googleusercontent.com
             client-secret: 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
             scope:
@@ -33,7 +33,7 @@ spring:
       cookie:
         same-site: none
         secure: true
-        domain : spitching.store
+        domain : null  # 도메인 설정 제거 또는 비워두기
         max-age: 21600s  # 세션 쿠키 유효 기간 설정 (6시간)
         timeout: 21600s    # 세션 타임아웃 설정 (6시간)
 server:
