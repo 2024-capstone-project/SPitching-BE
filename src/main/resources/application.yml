@@ -33,7 +33,7 @@ spring:
       cookie:
         same-site: none
         secure: true
-        domain : null  # 도메인 설정 제거 또는 비워두기
+        domain : .spitching.store
         max-age: 21600s  # 세션 쿠키 유효 기간 설정 (6시간)
         timeout: 21600s    # 세션 타임아웃 설정 (6시간)
 server:
