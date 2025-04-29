@@ -4,12 +4,14 @@ import com.google.common.net.HttpHeaders;
 import djj.spitching_be.Domain.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -74,7 +76,24 @@ public class SecurityConfig {
 
                                     // 리디렉션 URL에 세션 ID 추가
                                     //response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
-                                    response.sendRedirect("https://www.spitching.store/");
+                                    // 세션 ID 쿠키 직접 설정
+                                    HttpSession session = request.getSession(false);
+                                    if (session != null) {
+                                        Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
+                                        sessionCookie.setPath("/");
+                                        sessionCookie.setDomain("spitching.store");
+                                        sessionCookie.setMaxAge(21600);
+                                        sessionCookie.setSecure(true);
+                                        sessionCookie.setHttpOnly(true);
+                                        response.addCookie(sessionCookie);
+
+                                        // SameSite 속성은 쿠키 객체에 직접 설정할 수 없으므로 헤더로 직접 추가
+                                        response.addHeader("Set-Cookie",
+                                                "JSESSIONID=" + session.getId() +
+                                                        "; Path=/; Domain=spitching.store; Max-Age=21600; Secure; HttpOnly; SameSite=None");
+                                    }
+
+                                    response.sendRedirect("https://www.spitching.store/");;
                                 })
                 )
                 // 로그아웃
@@ -117,36 +136,48 @@ public class SecurityConfig {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
                     throws ServletException, IOException {
-
+                // 먼저 필터 체인 실행
                 filterChain.doFilter(request, response);
 
+                // 응답 헤더의 Set-Cookie 값 가져오기
                 Collection<String> headers = response.getHeaders("Set-Cookie");
-                boolean firstHeader = true;
-
-                for (String header : headers) {
-                    // 기존 SameSite, Secure 제거
-                    String cleanedHeader = header.replaceAll(";\\s?SameSite=[^;]*", "")
-                            .replaceAll(";\\s?Secure", "");
-
-                    String newHeader = cleanedHeader
-                            + "; SameSite=None; Secure"
-                            + "; Domain=spitching.store";
-
-                    if (firstHeader) {
-                        response.setHeader("Set-Cookie", newHeader);
-                        firstHeader = false;
-                    } else {
-                        response.addHeader("Set-Cookie", newHeader);
-                    }
+                if (headers == null || headers.isEmpty()) {
+                    return; // 쿠키가 없으면 종료
                 }
 
+                // 기존 Set-Cookie 헤더 제거
+                response.setHeader("Set-Cookie", null);
 
+                // 새로운 쿠키 헤더 추가
+                for (String header : headers) {
+                    // 로그로 원래 헤더 확인
+                    System.out.println("Original Cookie Header: " + header);
+
+                    // 모든 쿠키에 도메인과 SameSite 설정 추가
+                    String newHeader = header;
+                    if (!newHeader.contains("Domain=")) {
+                        newHeader += "; Domain=spitching.store";
+                    }
+                    if (!newHeader.contains("SameSite=")) {
+                        newHeader += "; SameSite=None";
+                    }
+                    if (!newHeader.contains("Secure")) {
+                        newHeader += "; Secure";
+                    }
+
+                    // 로그로 수정된 헤더 확인
+                    System.out.println("Modified Cookie Header: " + newHeader);
+
+                    // 새 헤더 추가
+                    response.addHeader("Set-Cookie", newHeader);
+                }
             }
         });
 
-        registrationBean.setOrder(1);
+        // 가장 높은 우선순위로 설정
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
-
 
 }
