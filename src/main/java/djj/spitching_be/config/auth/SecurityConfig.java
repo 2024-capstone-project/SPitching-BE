@@ -124,13 +124,23 @@ public class SecurityConfig {
                 boolean firstHeader = true;
 
                 for (String header : headers) {
+                    // 기존 SameSite, Secure 제거
+                    String cleanedHeader = header.replaceAll(";\\s?SameSite=[^;]*", "")
+                            .replaceAll(";\\s?Secure", "");
+
+                    String newHeader = cleanedHeader
+                            + "; SameSite=None; Secure"
+                            + "; Domain=spitching.store";
+
                     if (firstHeader) {
-                        response.setHeader("Set-Cookie", String.format("%s; SameSite=None; Secure", header));
+                        response.setHeader("Set-Cookie", newHeader);
                         firstHeader = false;
                     } else {
-                        response.addHeader("Set-Cookie", String.format("%s; SameSite=None; Secure", header));
+                        response.addHeader("Set-Cookie", newHeader);
                     }
                 }
+
+
             }
         });
 
