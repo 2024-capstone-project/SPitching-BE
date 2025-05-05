@@ -14,4 +14,6 @@ public class PresentationRequestDto {
     private String description;
 
     private Integer practiceCount;
+
+    private String duration; // 발표 시간
 }

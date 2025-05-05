@@ -27,10 +27,6 @@ public class Practice extends Timestamped{
     @Column(nullable = false)
     private PracticeType practice_type;
 
-    // 걸린 시간
-    @Column(nullable = false)
-    private String duration; // "00:05:30 이면 5분 30초"
-
     // 하나의 발표 연습(presentation)객체는 여러 연습을 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="presentation_id", nullable = false)
@@ -39,13 +35,11 @@ public class Practice extends Timestamped{
     // requestDto 정보를 가져와서 entity 만들 때 사용
     public Practice(PracticeRequestDto requestDto, Presentation presentation){
         this.practice_type = requestDto.getPractice_type();
-        this.duration = requestDto.getDuration();
         this.presentation = presentation;
     }
 
     // 업데이트 메소드
     public void update(PracticeRequestDto requestDto) {
         this.practice_type = requestDto.getPractice_type();
-        this.duration = requestDto.getDuration();
     }
 }
