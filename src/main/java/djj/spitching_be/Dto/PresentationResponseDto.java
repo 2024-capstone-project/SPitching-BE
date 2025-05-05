@@ -18,6 +18,7 @@ public class PresentationResponseDto {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private Integer practiceCount;
+    private String duration;
     private UserResponseDto user;
 
     // presentation의 정보를 받아 presentationResponseDto 생성
@@ -25,6 +26,7 @@ public class PresentationResponseDto {
         this.id= presentation.getId();
         this.title = presentation.getTitle();
         this.description = presentation.getDescription();
+        this.duration = presentation.getDuration();
         this.practiceCount = presentation.getPracticeCount();
         this.createdAt = presentation.getCreatedAt();
         this.updatedAt = presentation.getUpdatedAt();

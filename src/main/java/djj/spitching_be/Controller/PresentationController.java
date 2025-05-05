@@ -28,7 +28,7 @@ public class PresentationController {
     }
 
     // 발표 생성
-    @PostMapping("/presentations")
+    @PostMapping("/presentations/create")
     public ResponseEntity<PresentationResponseDto> createPresentation(
             @RequestBody PresentationRequestDto requestDto,
             @AuthenticationPrincipal OAuth2User principal) {
