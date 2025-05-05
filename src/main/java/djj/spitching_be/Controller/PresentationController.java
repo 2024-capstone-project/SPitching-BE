@@ -45,12 +45,6 @@ public class PresentationController {
         return ResponseEntity.ok(presentationService.getUserPresentations(email));
     }
 
-    // 전체 발표 목록 조회 - 삭제 예정
-    @GetMapping("presentations/list")
-    public List<PresentationListResponseDto> getAllPresentations(){
-        return presentationService.findAllPresentation();
-    }
-
     // 발표 하나 조회
     @GetMapping("presentations/{id}")
     public PresentationResponseDto getOnePresentation(@PathVariable Long id){
