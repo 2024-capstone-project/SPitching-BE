@@ -28,7 +28,7 @@ public class PresentationController {
     }
 
     // 발표 생성
-    @PostMapping("/presentations")
+    @PostMapping("/presentations/create")
     public ResponseEntity<PresentationResponseDto> createPresentation(
             @RequestBody PresentationRequestDto requestDto,
             @AuthenticationPrincipal OAuth2User principal) {
@@ -43,12 +43,6 @@ public class PresentationController {
             @AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         return ResponseEntity.ok(presentationService.getUserPresentations(email));
-    }
-
-    // 전체 발표 목록 조회 - 삭제 예정
-    @GetMapping("presentations/list")
-    public List<PresentationListResponseDto> getAllPresentations(){
-        return presentationService.findAllPresentation();
     }
 
     // 발표 하나 조회

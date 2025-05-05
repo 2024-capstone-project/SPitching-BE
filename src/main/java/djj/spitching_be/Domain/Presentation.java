@@ -28,6 +28,10 @@ public class Presentation extends Timestamped{
     // 연습 횟수
     private Integer practiceCount;
 
+    // 걸린 시간
+    @Column(nullable = false)
+    private String duration; // "00:05:30 이면 5분 30초"
+
     // 하나의 발표 연습은 여러 개의 슬라이드를 가질 수 있음
     // CascadeType.ALL 덕분에, 부모 엔티티에 따라 자식 엔티티도 다 수정/삭제됨.
     @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL)
@@ -49,6 +53,7 @@ public class Presentation extends Timestamped{
         this.title = requestDto.getTitle();
         this.description = requestDto.getDescription();
         this.practiceCount = requestDto.getPracticeCount();
+        this.duration = requestDto.getDuration();
         this.user= user;
     }
 

@@ -10,5 +10,5 @@ public class PracticeRequestDto {
 
     private Practice.PracticeType practice_type;
 
-    private String duration;
+    // private String duration;
 }
