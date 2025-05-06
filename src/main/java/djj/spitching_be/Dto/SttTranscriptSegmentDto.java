@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-class SttTranscriptSegmentDto {
+public class SttTranscriptSegmentDto {
     private Long start;
     private Long end;
     private String tag;
