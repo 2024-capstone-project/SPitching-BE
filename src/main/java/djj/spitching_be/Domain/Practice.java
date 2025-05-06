@@ -27,6 +27,10 @@ public class Practice extends Timestamped{
     @Column(nullable = false)
     private PracticeType practice_type;
 
+    // 스크립트 유사도 필드
+    @Column(name = "script_similarity", precision = 10, scale = 6)
+    private Double scriptSimilarity;
+
     // 하나의 발표 연습(presentation)객체는 여러 연습을 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="presentation_id", nullable = false)

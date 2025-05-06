@@ -9,4 +9,8 @@ import java.util.Optional;
 public interface PresentationSlideRepository extends JpaRepository<PresentationSlide, Long> {
     List<PresentationSlide> findByPresentationId(Long presentationId);
     Optional<PresentationSlide> findByPresentationIdAndSlideNumber(Long presentationId, Integer slideNumber);
+
+    // 특정 발표의 모든 슬라이드 조회 (슬라이드 번호 순으로 정렬)
+    List<PresentationSlide> findByPresentationIdOrderBySlideNumber(Long presentationId);
+
 }
