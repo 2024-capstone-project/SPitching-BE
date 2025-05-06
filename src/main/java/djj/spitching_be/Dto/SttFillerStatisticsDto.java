@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-class SttFillerStatisticsDto {
+public class SttFillerStatisticsDto {
     private Integer eo; // 어
     private Integer eum; // 음
     private Integer geu; // 그

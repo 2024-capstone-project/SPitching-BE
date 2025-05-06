@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-class SttScoreFeedbackDto {
+public class SttScoreFeedbackDto {
     private Double fluencyScore; // 발표 유창성 점수
 }
