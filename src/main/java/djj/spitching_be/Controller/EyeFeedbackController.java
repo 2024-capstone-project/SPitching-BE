@@ -24,7 +24,7 @@ public class EyeFeedbackController {
     private final PresentationRepository presentationRepository;
     private final PracticeRepository practiceRepository;
 
-    @PostMapping("/eye")
+    @PostMapping("/eyecontact")
     public ResponseEntity<String> saveEyeFeedback(@RequestBody EyeDto eyeDto){
         log.info("Received eye feedback from AI service: {}", eyeDto);
 
@@ -60,7 +60,7 @@ public class EyeFeedbackController {
         }
     }
 
-    @GetMapping("/practice/{practiceId}/eye")
+    @GetMapping("/practice/{practiceId}/eyecontact")
     public ResponseEntity<?> getEyeFeedbackByPractice(@PathVariable Long practiceId){
         try {
             // 연습 존재 여부 확인
