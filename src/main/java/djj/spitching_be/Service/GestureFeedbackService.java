@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class GestureFeedbackService {
     private final GestureRepository gestureRepository;
+    private final TotalScoreService totalScoreService;
 
     @Transactional
     public void saveGestureFeedback(GestureDto gestureDto, User user, Presentation presentation, Practice practice){
@@ -40,8 +41,10 @@ public class GestureFeedbackService {
         // 저장
         gestureRepository.save(gestureData);
 
-        log.info("Gesture feedback saved for user {}, presentation {}, practice {}",
-                user.getId(), presentation.getId(), practice.getId());
+        // 전체 점수 계산 시도
+        totalScoreService.calculateTotalScoreIfAllAvailable(practice.getId());
+
+        log.info("Gesture feedback saved successfully and total score calculation attempted");
     }
 
     // GestureFeedbackService.java의 getGestureFeedbackByPracticeId 메소드

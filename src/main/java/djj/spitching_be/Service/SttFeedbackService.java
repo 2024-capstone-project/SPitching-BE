@@ -21,6 +21,7 @@ public class SttFeedbackService {
     private final SttRepository sttRepository;
     private final SttTranscriptRepository sttTranscriptRepository;
     private final ScriptSimilarityService scriptSimilarityService; // 추가: ScriptSimilarityService 주입
+    private final TotalScoreService totalScoreService; // 추가: TotalScoreService 주입
 
     @Transactional
     public void saveSttFeedback(SttDto sttDto, User user, Presentation presentation, Practice practice) {
@@ -82,7 +83,10 @@ public class SttFeedbackService {
         // 7. STT 데이터 저장 후 대본 유사도 계산 및 저장
         scriptSimilarityService.calculateAndSaveScriptSimilarity(sttDto);
 
-        log.info("STT feedback and script similarity saved successfully");
+        // 전체 점수 계산 시도
+        totalScoreService.calculateTotalScoreIfAllAvailable(practice.getId());
+
+        log.info("STT feedback saved successfully and total score calculation attempted");
     }
 
     // 연습 ID로 STT 피드백 조회

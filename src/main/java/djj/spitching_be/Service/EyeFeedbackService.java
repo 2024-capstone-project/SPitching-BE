@@ -2,6 +2,7 @@ package djj.spitching_be.Service;
 
 import djj.spitching_be.Domain.*;
 import djj.spitching_be.Dto.EyeDto;
+import djj.spitching_be.Dto.SttDto;
 import djj.spitching_be.Repository.EyeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EyeFeedbackService {
     private final EyeRepository eyeRepository;
+    private final ScriptSimilarityService scriptSimilarityService;
+    private final TotalScoreService totalScoreService;
 
     @Transactional
-    public void saveEyeFeedback(EyeDto eyeDto, User user, Presentation presentation, Practice practice){
+    public void saveEyeFeedback(EyeDto eyeDto, SttDto sttDto, User user, Presentation presentation, Practice practice){
         // DTO를 엔티티로 변환
         EyeData eyeData = EyeData.builder()
                 .user(user)
@@ -29,8 +32,12 @@ public class EyeFeedbackService {
         // 저장
         eyeRepository.save(eyeData);
 
-        log.info("eye feedback saved for user {}, presentation {}, practice {}",
-                user.getId(), presentation.getId(), practice.getId());
+        scriptSimilarityService.calculateAndSaveScriptSimilarity(sttDto);
+
+        // 전체 점수 계산 시도
+        totalScoreService.calculateTotalScoreIfAllAvailable(practice.getId());
+
+        log.info("STT feedback saved successfully and total score calculation attempted");
     }
 
     // EyeFeedbackService.java의 getEyeFeedbackByPracticeId 메소드
