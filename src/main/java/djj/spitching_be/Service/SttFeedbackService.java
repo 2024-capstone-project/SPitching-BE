@@ -21,6 +21,7 @@ public class SttFeedbackService {
     private final SttRepository sttRepository;
     private final SttTranscriptRepository sttTranscriptRepository;
     private final ScriptSimilarityService scriptSimilarityService; // 추가: ScriptSimilarityService 주입
+    private final TotalScoreService totalScoreService; // 추가: TotalScoreService 주입
 
     @Transactional
     public void saveSttFeedback(SttDto sttDto, User user, Presentation presentation, Practice practice) {
