@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,9 +13,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Table(name = "stt_data")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)  // CreatedDate 어노테이션을 활성화하기 위해 추가
 public class SttData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
