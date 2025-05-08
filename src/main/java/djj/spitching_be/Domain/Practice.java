@@ -31,6 +31,14 @@ public class Practice extends Timestamped{
     @Column(name = "script_similarity")
     private Double scriptSimilarity;
 
+    // 전체 발표 점수
+    @Column(name = "total_score")
+    private Double totalScore;
+
+    // 전체 발표 점수 계산 완료 여부
+    @Column(name = "score_calculated")
+    private Boolean scoreCalculated = false;
+
     // 하나의 발표 연습(presentation)객체는 여러 연습을 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="presentation_id", nullable = false)
