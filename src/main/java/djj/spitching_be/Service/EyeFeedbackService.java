@@ -19,7 +19,7 @@ public class EyeFeedbackService {
     private final TotalScoreService totalScoreService;
 
     @Transactional
-    public void saveEyeFeedback(EyeDto eyeDto, SttDto sttDto, User user, Presentation presentation, Practice practice){
+    public void saveEyeFeedback(EyeDto eyeDto, User user, Presentation presentation, Practice practice){
         // DTO를 엔티티로 변환
         EyeData eyeData = EyeData.builder()
                 .user(user)
@@ -32,12 +32,10 @@ public class EyeFeedbackService {
         // 저장
         eyeRepository.save(eyeData);
 
-        scriptSimilarityService.calculateAndSaveScriptSimilarity(sttDto);
-
         // 전체 점수 계산 시도
         totalScoreService.calculateTotalScoreIfAllAvailable(practice.getId());
 
-        log.info("STT feedback saved successfully and total score calculation attempted");
+        log.info("Eye feedback saved successfully and total score calculation attempted");
     }
 
     // EyeFeedbackService.java의 getEyeFeedbackByPracticeId 메소드
