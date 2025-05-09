@@ -2,8 +2,7 @@ package djj.spitching_be.Service;
 
 import djj.spitching_be.Domain.*;
 import djj.spitching_be.Dto.*;
-import djj.spitching_be.Repository.SttRepository;
-import djj.spitching_be.Repository.SttTranscriptRepository;
+import djj.spitching_be.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,30 +11,43 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SttFeedbackService {
+
     private final SttRepository sttRepository;
     private final SttTranscriptRepository sttTranscriptRepository;
-    private final ScriptSimilarityService scriptSimilarityService; // 추가: ScriptSimilarityService 주입
-    private final TotalScoreService totalScoreService; // 추가: TotalScoreService 주입
+    private final PracticeRepository practiceRepository;
+    private final ScriptSimilarityService scriptSimilarityService;
+    private final TotalScoreService totalScoreService;
 
     @Transactional
     public void saveSttFeedback(SttDto sttDto, User user, Presentation presentation, Practice practice) {
         log.info("Saving STT feedback for user {}, presentation {}, practice {}",
                 user.getId(), presentation.getId(), practice.getId());
 
-        // 1. SttData 엔티티 생성 및 기본 정보 설정
-        SttData sttData = SttData.builder()
-                .user(user)
-                .presentation(presentation)
-                .practice(practice)
-                .build();
+        // 기존 데이터가 있는지 확인
+        Optional<SttData> existingSttData = sttRepository.findByPracticeId(practice.getId());
 
-        // 2. 필러(추임새) 통계 설정
+        SttData sttData;
+        if (existingSttData.isPresent()) {
+            // 기존 데이터가 있으면 업데이트
+            sttData = existingSttData.get();
+            // 기존 트랜스크립트 세그먼트 삭제 (orphanRemoval=true로 설정된 경우 자동 삭제됨)
+            sttData.getTranscriptSegments().clear();
+        } else {
+            // 새 데이터 생성
+            sttData = SttData.builder()
+                    .user(user)
+                    .presentation(presentation)
+                    .practice(practice)
+                    .build();
+        }
+
+        // 필러(추임새) 통계 설정
         if (sttDto.getStatisticsFiller() != null && !sttDto.getStatisticsFiller().isEmpty()) {
             SttFillerStatisticsDto fillerStats = sttDto.getStatisticsFiller().get(0);
             sttData.setFillerEo(fillerStats.getEo());
@@ -45,7 +57,7 @@ public class SttFeedbackService {
             sttData.setFillerRatio(fillerStats.getFillerRatio());
         }
 
-        // 3. 침묵 통계 설정
+        // 침묵 통계 설정
         if (sttDto.getStatisticsSilence() != null && !sttDto.getStatisticsSilence().isEmpty()) {
             SttSilenceStatisticsDto silenceStats = sttDto.getStatisticsSilence().get(0);
             sttData.setSilenceRatio(silenceStats.getSilenceRatio());
@@ -53,15 +65,15 @@ public class SttFeedbackService {
             sttData.setTotalPresentationTime(silenceStats.getTotalPresentationTime());
         }
 
-        // 4. STT 점수 설정
-        if (sttDto.getSttScoreFeedback() != null && !sttDto.getSttScoreFeedback().isEmpty()) {
-            sttData.setFluencyScore(sttDto.getSttScoreFeedback().get(0).getFluencyScore());
+        // 유창성 점수 설정 (수정: 루트 레벨에서 직접 가져옴)
+        if (sttDto.getFluencyScore() != null) {
+            sttData.setFluencyScore(sttDto.getFluencyScore());
         }
 
-        // 5. SttData 저장
+        // 저장
         SttData savedSttData = sttRepository.save(sttData);
 
-        // 6. 트랜스크립트 세그먼트 처리 및 저장
+        // 트랜스크립트 세그먼트 처리 및 저장
         if (sttDto.getTranscript() != null && !sttDto.getTranscript().isEmpty()) {
             List<SttTranscriptSegment> segments = new ArrayList<>();
 
@@ -80,13 +92,13 @@ public class SttFeedbackService {
             sttTranscriptRepository.saveAll(segments);
         }
 
-        // 7. STT 데이터 저장 후 대본 유사도 계산 및 저장
+        // 대본 유사도 계산 및 저장
         scriptSimilarityService.calculateAndSaveScriptSimilarity(sttDto);
 
         // 전체 점수 계산 시도
         totalScoreService.calculateTotalScoreIfAllAvailable(practice.getId());
 
-        log.info("STT feedback saved successfully and total score calculation attempted");
+        log.info("STT feedback saved successfully");
     }
 
     // 연습 ID로 STT 피드백 조회
@@ -100,9 +112,9 @@ public class SttFeedbackService {
         return convertToDto(sttData);
     }
 
-    // SttData 엔티티를 SttDto로 변환
+    // SttData 엔티티를 SttDto로 변환 (수정)
     private SttDto convertToDto(SttData sttData) {
-        // 1. 필러 통계 DTO 생성
+        // 필러 통계 DTO 생성
         SttFillerStatisticsDto fillerStats = SttFillerStatisticsDto.builder()
                 .eo(sttData.getFillerEo())
                 .eum(sttData.getFillerEum())
@@ -111,19 +123,14 @@ public class SttFeedbackService {
                 .fillerRatio(sttData.getFillerRatio())
                 .build();
 
-        // 2. 침묵 통계 DTO 생성
+        // 침묵 통계 DTO 생성
         SttSilenceStatisticsDto silenceStats = SttSilenceStatisticsDto.builder()
                 .silenceRatio(sttData.getSilenceRatio())
                 .speakingRatio(sttData.getSpeakingRatio())
                 .totalPresentationTime(sttData.getTotalPresentationTime())
                 .build();
 
-        // 3. STT 점수 DTO 생성
-        SttScoreFeedbackDto scoreDto = SttScoreFeedbackDto.builder()
-                .fluencyScore(sttData.getFluencyScore())
-                .build();
-
-        // 4. 트랜스크립트 세그먼트 DTO 생성
+        // 트랜스크립트 세그먼트 DTO 생성
         List<SttTranscriptSegmentDto> transcriptDtos = sttData.getTranscriptSegments().stream()
                 .map(segment -> SttTranscriptSegmentDto.builder()
                         .start(segment.getStart())
@@ -131,16 +138,16 @@ public class SttFeedbackService {
                         .tag(segment.getTag())
                         .result(segment.getResult())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
-        // 5. SttDto 생성 및 반환
+        // SttDto 생성 및 반환 (수정)
         return SttDto.builder()
                 .userId(sttData.getUser().getId())
                 .presentationId(sttData.getPresentation().getId())
                 .practiceId(sttData.getPractice().getId())
+                .fluencyScore(sttData.getFluencyScore()) // 수정: 루트 레벨 필드로 설정
                 .statisticsFiller(List.of(fillerStats))
                 .statisticsSilence(List.of(silenceStats))
-                .sttScoreFeedback(List.of(scoreDto))
                 .transcript(transcriptDtos)
                 .build();
     }

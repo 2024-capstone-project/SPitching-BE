@@ -11,15 +11,14 @@ public class SttDto {
     private Long userId;
     private Long presentationId;
     private Long practiceId;
+    private Double fluencyScore;
+
 
     // 필러(추임새) 통계 정보
     private List<SttFillerStatisticsDto> statisticsFiller;
 
     // 침묵 통계 정보
     private List<SttSilenceStatisticsDto> statisticsSilence;
-
-    // STT 점수 피드백
-    private List<SttScoreFeedbackDto> sttScoreFeedback;
 
     // 트랜스크립트 정보
     private List<SttTranscriptSegmentDto> transcript;

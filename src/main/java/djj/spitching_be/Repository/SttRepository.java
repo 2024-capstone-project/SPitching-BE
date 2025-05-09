@@ -20,4 +20,5 @@ public interface SttRepository extends JpaRepository<SttData, Long> {
 
     // 사용자의 특정 발표에 대한 STT 데이터 조회
     List<SttData> findByUserIdAndPresentationId(Long userId, Long presentationId);
+
 }
