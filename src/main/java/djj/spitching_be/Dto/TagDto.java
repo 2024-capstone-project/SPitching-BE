@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class TagDto {
+public class TagDto {
     private Integer page;
     private Integer count;
     private List<String> notes;

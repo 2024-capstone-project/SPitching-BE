@@ -13,4 +13,8 @@ public interface PresentationSlideRepository extends JpaRepository<PresentationS
     // 특정 발표의 모든 슬라이드 조회 (슬라이드 번호 순으로 정렬)
     List<PresentationSlide> findByPresentationIdOrderBySlideNumber(Long presentationId);
 
+    // 특정 발표의 첫 번째 슬라이드 조회
+    Optional<PresentationSlide> findFirstByPresentationIdOrderBySlideNumber(Long presentationId);
+
+
 }
