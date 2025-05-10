@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public interface PracticeRepository extends JpaRepository <Practice, Long> {
     // 특정 발표의 최근 5개 연습 조회
-    List<Practice> findTop5ByPresentationIdOrderByPracticeDateDesc(Long presentationId);
+    List<Practice> findTop5ByPresentationIdOrderByCreatedAtDesc(Long presentationId);
 
     // 특정 발표의 가장 최근 연습 조회
-    Optional<Practice> findTopByPresentationIdOrderByPracticeDateDesc(Long presentationId);
+    Optional<Practice> findTopByPresentationIdOrderByCreatedAtDesc(Long presentationId);
 
     // 특정 발표의 연습 개수 조회
     Integer countByPresentationId(Long presentationId);
