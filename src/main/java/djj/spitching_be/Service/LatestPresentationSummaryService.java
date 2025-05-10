@@ -33,14 +33,14 @@ public class LatestPresentationSummaryService {
                 .orElseThrow(() -> new NoSuchElementException("No presentations found for user ID: " + userId));
 
         // 2. 해당 발표의 가장 최근 연습 조회
-        Practice latestPractice = practiceRepository.findTopByPresentationIdOrderByPracticeDateDesc(latestPresentation.getId())
+        Practice latestPractice = practiceRepository.findTopByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId())
                 .orElseThrow(() -> new NoSuchElementException("No practices found for presentation ID: " + latestPresentation.getId()));
 
         // 3. 해당 발표의 연습 개수 조회
         Integer practiceCount = practiceRepository.countByPresentationId(latestPresentation.getId());
 
         // 4. 해당 발표의 연습 점수 기록 조회 (최근 5개)
-        List<Practice> recentPractices = practiceRepository.findTop5ByPresentationIdOrderByPracticeDateDesc(latestPresentation.getId());
+        List<Practice> recentPractices = practiceRepository.findTop5ByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId());
 
         // 5. 가장 최근 연습의 각 점수 조회
         GraphDto graph = getScoreDetails(latestPractice.getId(), recentPractices);
