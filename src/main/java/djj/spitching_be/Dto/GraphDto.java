@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class GraphDto {
+public class GraphDto {
     private Double currentScore;
     private List<Double> previousScores;  // 최근 -> 옛날 순서
     private Double eyeScore;

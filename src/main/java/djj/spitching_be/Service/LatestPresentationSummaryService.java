@@ -29,7 +29,7 @@ public class LatestPresentationSummaryService {
      */
     public LatestPresentationSummaryDto getLatestPresentationSummary(Long userId) {
         // 1. 가장 최근 발표 조회
-        Presentation latestPresentation = presentationRepository.findTopByUserIdOrderByCreatedAtDesc(userId)
+        Presentation latestPresentation = presentationRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
                 .orElseThrow(() -> new NoSuchElementException("No presentations found for user ID: " + userId));
 
         // 2. 해당 발표의 가장 최근 연습 조회
@@ -61,7 +61,7 @@ public class LatestPresentationSummaryService {
                 .title(latestPresentation.getTitle())
                 .description(latestPresentation.getDescription())
                 .created(latestPresentation.getCreatedAt())
-                .lastPractice(latestPractice.getPracticeDate())
+                .lastPractice(latestPractice.getCreatedAt())
                 .practiceCount(practiceCount)
                 .graph(graph)
                 .tags(tags)
@@ -105,7 +105,7 @@ public class LatestPresentationSummaryService {
      */
     private Double getEyeScore(Long practiceId) {
         return eyeRepository.findByPracticeId(practiceId)
-                .map(eyeData -> eyeData.getEyecontactScore().doubleValue())
+                .map(eyeData -> (double) eyeData.getEyecontactScore())
                 .orElse(null);
     }
 
@@ -114,7 +114,7 @@ public class LatestPresentationSummaryService {
      */
     private Double getGestureScore(Long practiceId) {
         return gestureRepository.findByPracticeId(practiceId)
-                .map(gestureData -> gestureData.getGestureScore().doubleValue())
+                .map(gestureData -> (double) gestureData.getGestureScore())
                 .orElse(null);
     }
 
