@@ -39,10 +39,10 @@ public class PresentationController {
 
     // 특정 사용자가 자신의 발표 연습 목록 조회하기
     @GetMapping("/presentations/my")
-    public ResponseEntity<List<Presentation>> getMyPresentations(
+    public ResponseEntity<List<PresentationListResponseDto>> getMyPresentations(
             @AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
-        return ResponseEntity.ok(presentationService.getUserPresentations(email));
+        return ResponseEntity.ok(presentationService.getUserPresentationsWithDto(email));
     }
 
     // 발표 하나 조회
