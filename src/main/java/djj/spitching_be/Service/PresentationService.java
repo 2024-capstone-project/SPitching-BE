@@ -65,6 +65,14 @@ public class PresentationService {
         return presentationRepository.findByUserEmail(email);
     }
 
+    // 사용자 발표 목록을 DTO로 변환하여 반환
+    public List<PresentationListResponseDto> getUserPresentationsWithDto(String email) {
+        List<Presentation> presentations = presentationRepository.findByUserEmail(email);
+        return presentations.stream()
+                .map(PresentationListResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
     // 모든 발표 가져오기 - 삭제 예정
     public List<PresentationListResponseDto> findAllPresentation() {
         return presentationRepository.findAllByOrderByUpdatedAtDesc()
