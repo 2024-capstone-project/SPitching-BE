@@ -52,6 +52,10 @@ public class Practice extends Timestamped{
         this.presentation = presentation;
     }
 
+    public Double getTotalScore() {
+        return totalScore;
+    }
+
     // 업데이트 메소드
     public void update(PracticeRequestDto requestDto) {
         this.practice_type = requestDto.getPractice_type();
