@@ -1,5 +1,6 @@
 package djj.spitching_be.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import djj.spitching_be.Dto.PracticeRequestDto;
 import djj.spitching_be.Dto.PresentationRequestDto;
 import jakarta.persistence.*;
@@ -41,6 +42,7 @@ public class Practice extends Timestamped{
 
     // 하나의 발표 연습(presentation)객체는 여러 연습을 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore  // 이 어노테이션 추가
     @JoinColumn(name="presentation_id", nullable = false)
     private Presentation presentation;
 
@@ -48,6 +50,10 @@ public class Practice extends Timestamped{
     public Practice(PracticeRequestDto requestDto, Presentation presentation){
         this.practice_type = requestDto.getPractice_type();
         this.presentation = presentation;
+    }
+
+    public Double getTotalScore() {
+        return totalScore;
     }
 
     // 업데이트 메소드
