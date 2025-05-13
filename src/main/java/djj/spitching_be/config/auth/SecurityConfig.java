@@ -66,13 +66,16 @@ public class SecurityConfig {
                                     try {
                                         User user = customOAuth2UserService.saveOrUpdateUser(oauth2User);
                                         log.info("User saved/updated successfully: {}", user.getEmail());
+
+                                        // 세션에 userId 저장
+                                        HttpSession session = request.getSession(false);
+                                        if (session != null) {
+                                            session.setAttribute("userId", user.getId());
+                                            log.info("User ID saved to session: {}", user.getId());
+                                        }
                                     } catch (Exception e) {
                                         log.error("Error saving user", e);
                                     }
-
-                                    // 이 부분을 추가: 세션 ID를 URL 파라미터로 포함
-//                                    HttpSession session = request.getSession(false);
-//                                    String sessionId = session != null ? session.getId() : "";
 
                                     // 리디렉션 URL에 세션 ID 추가
                                     //response.sendRedirect("https://spitching.vercel.app?session_id=" + sessionId);
