@@ -2,6 +2,7 @@ package djj.spitching_be.Controller;
 
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
+import djj.spitching_be.Dto.SlideScriptDto;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.PresentationSlideRepository;
 import djj.spitching_be.Dto.ScriptUpdateRequestDto;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -60,6 +62,49 @@ public class SlideScriptController {
         PresentationSlide slide = slideOpt.get();
         slide.setScript(requestDto.getScript());
         slideRepository.save(slide);
+
+        return ResponseEntity.ok("대본이 저장되었습니다.");
+    }
+
+    // 여러 슬라이드의 대본을 한 번에 업데이트하는 새로운 메서드
+    @PutMapping("/presentations/{presentationId}/slides/script")
+    public ResponseEntity<?> updateMultipleScripts(
+            @PathVariable Long presentationId,
+            @RequestBody List<SlideScriptDto> scriptDtos,
+            @AuthenticationPrincipal OAuth2User principal) {
+
+        // 현재 로그인한 사용자 이메일 가져오기
+        String email = principal.getAttribute("email");
+
+        // 발표가 존재하는지, 그리고 현재 사용자의 발표인지 확인
+        Optional<Presentation> presentationOpt = presentationRepository.findById(presentationId);
+
+        if (presentationOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Presentation presentation = presentationOpt.get();
+
+        // 현재 사용자의 발표인지 확인 (보안)
+        if (!presentation.getUser().getEmail().equals(email)) {
+            return ResponseEntity.status(403).body("이 발표 자료에 대한 접근 권한이 없습니다.");
+        }
+
+        // 각 슬라이드의 대본 업데이트
+        for (SlideScriptDto dto : scriptDtos) {
+            Optional<PresentationSlide> slideOpt = slideRepository.findById(dto.getSlideId());
+
+            // 슬라이드가 존재하고 해당 발표에 속하는지 확인
+            if (slideOpt.isPresent()) {
+                PresentationSlide slide = slideOpt.get();
+
+                // 해당 슬라이드가 현재 발표에 속하는지 확인
+                if (slide.getPresentation().getId().equals(presentationId)) {
+                    slide.setScript(dto.getScript());
+                    slideRepository.save(slide);
+                }
+            }
+        }
 
         return ResponseEntity.ok("대본이 저장되었습니다.");
     }
