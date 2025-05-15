@@ -1,8 +1,11 @@
 package djj.spitching_be.Dto;
 
 import lombok.Getter;
+import lombok.Setter;
+
 @Getter
-public class SlideScriptDto {
+@Setter
+public class SlideScriptUpdateDto {
     private Long slideId;
     private String script;
 }
