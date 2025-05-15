@@ -1,6 +1,7 @@
 package djj.spitching_be.Service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
@@ -122,7 +123,10 @@ public class PresentationService {
 
             // PDF 파일을 S3에 업로드
             String pdfKey = "presentations/" + presentationId + "/original.pdf";
-            amazonS3Client.putObject(new PutObjectRequest(bucketName, pdfKey, tempFile));
+            amazonS3Client.putObject(
+                    new PutObjectRequest(bucketName, pdfKey, tempFile)
+                            .withCannedAcl(CannedAccessControlList.PublicRead) // 공개 읽기 권한 추가
+            );
 
             for (int page = 0; page < document.getNumberOfPages(); page++) {
                 BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
@@ -133,7 +137,10 @@ public class PresentationService {
 
                 // 이미지를 S3에 업로드
                 String imageKey = "presentations/" + presentationId + "/slides/slide_" + (page + 1) + ".png";
-                amazonS3Client.putObject(new PutObjectRequest(bucketName, imageKey, imageFile));
+                amazonS3Client.putObject(
+                        new PutObjectRequest(bucketName, imageKey, imageFile)
+                                .withCannedAcl(CannedAccessControlList.PublicRead) // 공개 읽기 권한 추가
+                );
 
                 // S3 URL 생성
                 String imageUrl = amazonS3Client.getUrl(bucketName, imageKey).toString();
