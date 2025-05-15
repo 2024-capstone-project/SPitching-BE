@@ -1,10 +1,10 @@
 package djj.spitching_be.Dto;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor
+@Setter
 public class ScriptUpdateRequestDto {
     private String script;
 }

@@ -6,10 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
 import djj.spitching_be.Domain.User;
-import djj.spitching_be.Dto.PresentationListResponseDto;
-import djj.spitching_be.Dto.PresentationRequestDto;
-import djj.spitching_be.Dto.PresentationResponseDto;
-import djj.spitching_be.Dto.PresentationTitleUpdateRequestDto;
+import djj.spitching_be.Dto.*;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.PresentationSlideRepository;
 import djj.spitching_be.Repository.UserRepository;
@@ -158,4 +155,35 @@ public class PresentationService {
             return slides;
         }
     }
+
+    // PresentationService.java
+    public String updateSlidesScripts(Long presentationId, List<SlideScriptUpdateDto> scriptUpdateDtos, String email) {
+        // 프레젠테이션 소유자 확인 (선택적)
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프레젠테이션입니다."));
+
+        // 사용자 인증 확인 (선택적)
+        if (!presentation.getUser().getEmail().equals(email)) {
+            throw new IllegalArgumentException("해당 프레젠테이션을 수정할 권한이 없습니다.");
+        }
+
+        // 각 슬라이드 스크립트 업데이트
+        for (SlideScriptUpdateDto updateDto : scriptUpdateDtos) {
+            PresentationSlide slide = slideRepository.findById(updateDto.getSlideId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 슬라이드입니다. 슬라이드 ID: " + updateDto.getSlideId()));
+
+            // 해당 슬라이드가 현재 프레젠테이션의 것인지 확인
+            if (!slide.getPresentation().getId().equals(presentationId)) {
+                throw new IllegalArgumentException("해당 슬라이드는 현재 프레젠테이션에 속하지 않습니다. 슬라이드 ID: " + updateDto.getSlideId());
+            }
+
+            // 스크립트 업데이트
+            slide.setScript(updateDto.getScript());
+            slideRepository.save(slide);
+        }
+
+        return "대본이 저장되었습니다.";
+    }
+
+
 }

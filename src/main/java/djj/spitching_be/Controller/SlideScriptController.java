@@ -2,10 +2,12 @@ package djj.spitching_be.Controller;
 
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
-import djj.spitching_be.Dto.SlideScriptDto;
+import djj.spitching_be.Dto.MessageResponseDto;
+import djj.spitching_be.Dto.SlideScriptUpdateDto;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.PresentationSlideRepository;
 import djj.spitching_be.Dto.ScriptUpdateRequestDto;
+import djj.spitching_be.Service.PresentationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -19,11 +21,14 @@ import java.util.Optional;
 public class SlideScriptController {
     private final PresentationSlideRepository slideRepository;
     private final PresentationRepository presentationRepository;
+    private final PresentationService presentationService;
 
     public SlideScriptController(PresentationSlideRepository slideRepository,
-                                 PresentationRepository presentationRepository) {
+                                 PresentationRepository presentationRepository,
+                                 PresentationService presentationService) {
         this.slideRepository = slideRepository;
         this.presentationRepository = presentationRepository;
+        this.presentationService = presentationService;
     }
 
     // 발표 ID와 슬라이드 번호로 대본 업데이트
@@ -67,45 +72,19 @@ public class SlideScriptController {
     }
 
     // 여러 슬라이드의 대본을 한 번에 업데이트하는 새로운 메서드
-    @PutMapping("/presentations/{presentationId}/slides/script")
-    public ResponseEntity<?> updateMultipleScripts(
-            @PathVariable Long presentationId,
-            @RequestBody List<SlideScriptDto> scriptDtos,
+    // 발표의 모든 슬라이드 스크립트 한 번에 업데이트
+    @PutMapping("/presentations/{id}/slides/script")
+    public ResponseEntity<MessageResponseDto> updateSlidesScripts(
+            @PathVariable Long id,
+            @RequestBody List<SlideScriptUpdateDto> scriptUpdateDtos,
             @AuthenticationPrincipal OAuth2User principal) {
 
-        // 현재 로그인한 사용자 이메일 가져오기
+        // 사용자 인증 확인 (필요시)
         String email = principal.getAttribute("email");
 
-        // 발표가 존재하는지, 그리고 현재 사용자의 발표인지 확인
-        Optional<Presentation> presentationOpt = presentationRepository.findById(presentationId);
+        // 서비스 메소드 호출하여 스크립트 업데이트
+        String result = presentationService.updateSlidesScripts(id, scriptUpdateDtos, email);
 
-        if (presentationOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Presentation presentation = presentationOpt.get();
-
-        // 현재 사용자의 발표인지 확인 (보안)
-        if (!presentation.getUser().getEmail().equals(email)) {
-            return ResponseEntity.status(403).body("이 발표 자료에 대한 접근 권한이 없습니다.");
-        }
-
-        // 각 슬라이드의 대본 업데이트
-        for (SlideScriptDto dto : scriptDtos) {
-            Optional<PresentationSlide> slideOpt = slideRepository.findById(dto.getSlideId());
-
-            // 슬라이드가 존재하고 해당 발표에 속하는지 확인
-            if (slideOpt.isPresent()) {
-                PresentationSlide slide = slideOpt.get();
-
-                // 해당 슬라이드가 현재 발표에 속하는지 확인
-                if (slide.getPresentation().getId().equals(presentationId)) {
-                    slide.setScript(dto.getScript());
-                    slideRepository.save(slide);
-                }
-            }
-        }
-
-        return ResponseEntity.ok("대본이 저장되었습니다.");
+        return ResponseEntity.ok(new MessageResponseDto(result));
     }
 }
