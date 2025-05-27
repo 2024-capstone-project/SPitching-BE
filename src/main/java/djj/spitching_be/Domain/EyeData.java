@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor // 매개변수 없는 기본 생성자를 생성
 @AllArgsConstructor // 모든 필드를 매개변수로 갖는 생성자를 생성
 @Builder
+@EntityListeners(AuditingEntityListener.class)  // 이 어노테이션 추가
 public class EyeData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
