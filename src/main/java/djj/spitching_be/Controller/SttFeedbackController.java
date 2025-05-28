@@ -7,13 +7,13 @@ import djj.spitching_be.Dto.SttDto;
 import djj.spitching_be.Repository.PracticeRepository;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.UserRepository;
+import djj.spitching_be.Service.ScriptSimilarityService;
 import djj.spitching_be.Service.SttFeedbackService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 @Slf4j
 @RestController
 @RequestMapping("api/v1/feedback")
@@ -23,6 +23,7 @@ public class SttFeedbackController {
     private final UserRepository userRepository;
     private final PresentationRepository presentationRepository;
     private final PracticeRepository practiceRepository;
+    private final ScriptSimilarityService scriptSimilarityService; // 🔥 추가 2
 
     @PostMapping("/stt")
     public ResponseEntity<String> saveSttFeedback(@RequestBody SttDto sttDto) {
@@ -48,6 +49,14 @@ public class SttFeedbackController {
 
             // 5. STT 피드백 저장
             sttFeedbackService.saveSttFeedback(sttDto, user, presentation, practice);
+
+            // 🔥 추가 3: STT 저장 후 유사도 계산
+            try {
+                scriptSimilarityService.calculateAndSaveScriptSimilarity(sttDto);
+                log.info("Script similarity calculated for practice ID: {}", sttDto.getPracticeId());
+            } catch (Exception e) {
+                log.error("Error calculating similarity, but STT saved successfully", e);
+            }
 
             return ResponseEntity.ok("STT feedback saved successfully");
         } catch (EntityNotFoundException e) {
