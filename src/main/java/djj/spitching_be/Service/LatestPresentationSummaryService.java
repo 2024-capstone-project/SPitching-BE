@@ -32,38 +32,46 @@ public class LatestPresentationSummaryService {
         Presentation latestPresentation = presentationRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
                 .orElseThrow(() -> new NoSuchElementException("No presentations found for user ID: " + userId));
 
-        // 2. 해당 발표의 가장 최근 연습 조회
-        Practice latestPractice = practiceRepository.findTopByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId())
-                .orElseThrow(() -> new NoSuchElementException("No practices found for presentation ID: " + latestPresentation.getId()));
+        // 2. 해당 발표의 가장 최근 연습 조회 (Optional로 처리 : practice가 없는 경우 에러가 떠서)
+        Optional<Practice> latestPracticeOpt = practiceRepository.findTopByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId());
 
         // 3. 해당 발표의 연습 개수 조회
         Integer practiceCount = practiceRepository.countByPresentationId(latestPresentation.getId());
 
-        // 4. 해당 발표의 연습 점수 기록 조회 (최근 5개)
-        List<Practice> recentPractices = practiceRepository.findTop5ByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId());
+        // 4. Practice가 있는 경우에만 점수 정보 조회
+        GraphDto graph = null;
+        Long practiceId = null;
+        LocalDateTime lastPracticeTime = null;
 
-        // 5. 가장 최근 연습의 각 점수 조회
-        GraphDto graph = getScoreDetails(latestPractice.getId(), recentPractices);
+        if (latestPracticeOpt.isPresent()) { // practice가 있는 경우에만 정보들 get
+            Practice latestPractice = latestPracticeOpt.get();
+            practiceId = latestPractice.getId();
+            lastPracticeTime = latestPractice.getCreatedAt();
 
-        // 6. 슬라이드 및 태그 정보 조회
+            // 해당 발표의 연습 점수 기록 조회 (최근 5개)
+            List<Practice> recentPractices = practiceRepository.findTop5ByPresentationIdOrderByCreatedAtDesc(latestPresentation.getId());
+            graph = getScoreDetails(latestPractice.getId(), recentPractices);
+        }
+
+        // 5. 슬라이드 및 태그 정보 조회
         List<TagDto> tags = getTagInformation(latestPresentation.getId());
 
-        // 7. 첫 슬라이드 이미지 URL 조회
+        // 6. 첫 슬라이드 이미지 URL 조회
         String firstSlideImageUrl = presentationSlideRepository
                 .findFirstByPresentationIdOrderBySlideNumber(latestPresentation.getId())
                 .map(PresentationSlide::getImageUrl)
                 .orElse(null);
 
-        // 8. 응답 DTO 생성
+        // 7. 응답 DTO 생성
         return LatestPresentationSummaryDto.builder()
                 .presentationId(latestPresentation.getId())
-                .practiceId(latestPractice.getId())
+                .practiceId(practiceId)  // Practice가 없으면 null
                 .title(latestPresentation.getTitle())
                 .description(latestPresentation.getDescription())
                 .created(latestPresentation.getCreatedAt())
-                .lastPractice(latestPractice.getCreatedAt())
+                .lastPractice(lastPracticeTime)  // Practice가 없으면 null
                 .practiceCount(practiceCount)
-                .graph(graph)
+                .graph(graph)  // Practice가 없으면 null
                 .tags(tags)
                 .firstSlideImageUrl(firstSlideImageUrl)
                 .build();
