@@ -3,10 +3,14 @@ package djj.spitching_be.Service;
 import djj.spitching_be.Domain.Practice;
 import djj.spitching_be.Domain.Presentation;
 import djj.spitching_be.Domain.PresentationSlide;
+import djj.spitching_be.Domain.SttData;
+import djj.spitching_be.Domain.SttTranscriptSegment;
 import djj.spitching_be.Dto.SttDto;
 import djj.spitching_be.Repository.PracticeRepository;
 import djj.spitching_be.Repository.PresentationRepository;
 import djj.spitching_be.Repository.PresentationSlideRepository;
+import djj.spitching_be.Repository.SttRepository;
+import djj.spitching_be.Repository.SttTranscriptRepository;
 import djj.spitching_be.Domain.TextSimilarityUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -27,6 +28,8 @@ public class ScriptSimilarityService {
     private final PracticeRepository practiceRepository;
     private final PresentationRepository presentationRepository;
     private final PresentationSlideRepository presentationSlideRepository;
+    private final SttRepository sttRepository;
+    private final SttTranscriptRepository sttTranscriptRepository;
     private final TextSimilarityUtil textSimilarityUtil;
 
     /**
@@ -47,12 +50,7 @@ public class ScriptSimilarityService {
                 return 0.0;
             }
 
-            // transcript 체크
-            if (sttDto.getTranscript() == null) {
-                log.error("❌ [STEP 1-2] Transcript is null");
-                return 0.0;
-            }
-            log.info("📝 [STEP 1-3] Transcript size: {}", sttDto.getTranscript().size());
+            log.info("✅ [STEP 1-2] 기본 검증 완료 - practiceId: {}, presentationId: {}", practiceId, presentationId);
 
             // 연습 정보 조회
             Practice practice = practiceRepository.findById(practiceId)
@@ -70,18 +68,20 @@ public class ScriptSimilarityService {
 
             // 모든 슬라이드의 대본을 하나로 합쳐서 전체 대본 생성
             StringBuilder fullScript = new StringBuilder();
+            int scriptSlideCount = 0;
             for (PresentationSlide slide : slides) {
                 String slideScript = slide.getScript();
-                log.info("📄 [STEP 3-2] Slide {} script: {}", slide.getSlideNumber(),
-                        slideScript != null ? slideScript.substring(0, Math.min(50, slideScript.length())) + "..." : "null");
                 if (slideScript != null && !slideScript.trim().isEmpty()) {
                     fullScript.append(slideScript).append(" ");
+                    scriptSlideCount++;
+                    log.info("📄 [STEP 3-2] Slide {} script: {}", slide.getSlideNumber(),
+                            slideScript.substring(0, Math.min(50, slideScript.length())) + "...");
                 }
             }
 
             String completeScript = fullScript.toString().trim();
-            log.info("📖 [STEP 4] 완전한 대본 생성 - length: {}, preview: '{}'",
-                    completeScript.length(),
+            log.info("📖 [STEP 4] 완전한 대본 생성 - 스크립트가 있는 슬라이드: {}/{}, 총 length: {}, preview: '{}'",
+                    scriptSlideCount, slides.size(), completeScript.length(),
                     completeScript.length() > 0 ? completeScript.substring(0, Math.min(100, completeScript.length())) + "..." : "EMPTY");
 
             if (completeScript.isEmpty()) {
@@ -89,38 +89,64 @@ public class ScriptSimilarityService {
                 return 0.0;
             }
 
-            // STT 트랜스크립트에서 발화 내용 추출
-            List<Map<String, Object>> transcriptList = new ArrayList<>();
-            for (Object segment : sttDto.getTranscript()) {
-                if (segment instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> segmentMap = (Map<String, Object>) segment;
-                    transcriptList.add(segmentMap);
+            // ✅ 새로운 방식: DB에서 저장된 전사본 조회
+            log.info("🔍 [STEP 5] DB에서 전사본 조회 시작 - practiceId: {}", practiceId);
 
-                    // 🔍 각 세그먼트의 내용을 로그로 확인
-                    log.info("📊 [STEP 5-1] Segment: tag={}, result={}",
-                            segmentMap.get("tag"), segmentMap.get("result"));
+            // 먼저 practice에 연결된 SttData 조회
+            Optional<SttData> sttDataOpt = sttRepository.findByPracticeId(practiceId);
+            if (sttDataOpt.isEmpty()) {
+                log.warn("❌ [STEP 5-1] STT 데이터를 찾을 수 없음 - practiceId: {}", practiceId);
+                return 0.0;
+            }
+
+            SttData sttData = sttDataOpt.get();
+            log.info("✅ [STEP 5-2] STT 데이터 조회 완료 - sttDataId: {}", sttData.getId());
+
+            // SttData ID로 전사본 세그먼트들 조회
+            List<SttTranscriptSegment> transcriptSegments = sttTranscriptRepository.findBySttDataId(sttData.getId());
+            log.info("📊 [STEP 5-3] DB에서 조회된 전체 STT 세그먼트 개수: {}", transcriptSegments.size());
+
+            // tag별 분포 확인
+            Map<String, Integer> tagCount = new HashMap<>();
+            for (SttTranscriptSegment segment : transcriptSegments) {
+                String tag = segment.getTag();
+                tagCount.put(tag, tagCount.getOrDefault(tag, 0) + 1);
+                log.info("📊 [STEP 5-4] STT Segment - tag: {}, result: {}",
+                        tag, segment.getResult() != null ?
+                                segment.getResult().substring(0, Math.min(30, segment.getResult().length())) + "..." : "null");
+            }
+            log.info("📊 [STEP 5-5] Tag 분포: {}", tagCount);
+
+            // tag가 "1000"인 발화 내용만 추출
+            StringBuilder transcribedTextBuilder = new StringBuilder();
+            int speechCount = 0;
+            for (SttTranscriptSegment segment : transcriptSegments) {
+                if ("1000".equals(segment.getTag()) && segment.getResult() != null && !segment.getResult().trim().isEmpty()) {
+                    transcribedTextBuilder.append(segment.getResult().trim()).append(" ");
+                    speechCount++;
                 }
             }
-            log.info("📋 [STEP 5] 트랜스크립트 리스트 생성 완료 - 세그먼트 개수: {}", transcriptList.size());
 
-            String transcribedText = textSimilarityUtil.extractSpeechFromTranscript(transcriptList);
-            log.info("🎤 [STEP 6] 전사본 추출 완료 - length: {}, content: '{}'",
-                    transcribedText.length(),
+            String transcribedText = transcribedTextBuilder.toString().trim();
+            log.info("🎤 [STEP 6] DB에서 추출한 전사본 - 발화 세그먼트 수: {}, 총 length: {}, content: '{}'",
+                    speechCount, transcribedText.length(),
                     transcribedText.length() > 0 ? transcribedText.substring(0, Math.min(100, transcribedText.length())) + "..." : "EMPTY");
 
             if (transcribedText.isEmpty()) {
-                log.warn("❌ [STEP 6-1] Transcribed text is empty for practice ID: {}", practiceId);
+                log.warn("❌ [STEP 6-1] DB에서 조회한 전사본이 비어있음 - practiceId: {}", practiceId);
+                log.warn("❌ [STEP 6-2] 전체 STT 세그먼트는 {}개 있지만 tag='1000'인 발화 데이터가 없음", transcriptSegments.size());
                 return 0.0;
             }
 
             // 🔥 유사도 계산 직전
             log.info("🧮 [STEP 7] 유사도 계산 시작...");
-            log.info("📖 [STEP 7-1] 대본 최종: '{}'", completeScript);
-            log.info("🎤 [STEP 7-2] 전사본 최종: '{}'", transcribedText);
+            log.info("📖 [STEP 7-1] 대본 최종 (length: {}): '{}'", completeScript.length(),
+                    completeScript.length() > 200 ? completeScript.substring(0, 200) + "..." : completeScript);
+            log.info("🎤 [STEP 7-2] 전사본 최종 (length: {}): '{}'", transcribedText.length(),
+                    transcribedText.length() > 200 ? transcribedText.substring(0, 200) + "..." : transcribedText);
 
             double similarity = textSimilarityUtil.calculateCosineSimilarity(completeScript, transcribedText);
-            log.info("✅ [STEP 8] 유사도 계산 완료 - similarity: {}", similarity);
+            log.info("✅ [STEP 8] 유사도 계산 완료 - raw similarity: {}", similarity);
 
             // 🔥 유사도 검증
             if (Double.isNaN(similarity)) {
