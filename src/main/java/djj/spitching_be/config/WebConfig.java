@@ -28,6 +28,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://spitching.vercel.app",
                         "http://localhost:5173") // 정확한 도메인만
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true); // 이거 있어야 쿠키 포함 가능
     }
 }
