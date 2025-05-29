@@ -22,7 +22,7 @@ public class GestureData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int gestureScore;
+    private int gestureScore; // 최종 제스처 점수
     private int straightScore;
     private int explainScore;
     private int crossedScore;
