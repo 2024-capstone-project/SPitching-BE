@@ -1,9 +1,6 @@
 package djj.spitching_be.Service;
 
-import djj.spitching_be.Domain.EyeData;
-import djj.spitching_be.Domain.GestureData;
-import djj.spitching_be.Domain.Practice;
-import djj.spitching_be.Domain.SttData;
+import djj.spitching_be.Domain.*;
 import djj.spitching_be.Repository.EyeRepository;
 import djj.spitching_be.Repository.GestureRepository;
 import djj.spitching_be.Repository.PracticeRepository;
@@ -14,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -159,5 +154,58 @@ public class TotalScoreService {
         } catch (Exception e) {
             log.error("Error calculating total score", e);
         }
+    }
+
+    /**
+     * practice ID로 해당 practice의 presentation을 찾고,
+     * 그 presentation에 속한 모든 practice들의 세부 점수를 조회합니다.
+     */
+    public Map<String, Object> getPresentationScoresByPracticeId(Long practiceId) {
+        // 1. practice ID로 practice 조회
+        Practice practice = practiceRepository.findById(practiceId)
+                .orElseThrow(() -> new EntityNotFoundException("Practice not found with id: " + practiceId));
+
+        // 2. practice에서 presentation 정보 가져오기
+        Presentation presentation = practice.getPresentation();
+        Long presentationId = presentation.getId();
+
+        // 3. 해당 presentation에 속한 모든 practice들 조회
+        List<Practice> practices = practiceRepository.findByPresentationIdOrderByCreatedAtAsc(presentationId);
+
+        // 4. 각 practice별 점수 데이터 수집
+        List<Map<String, Object>> scoreList = new ArrayList<>();
+        int period = 1;
+
+        for (Practice p : practices) {
+            Map<String, Object> scoreData = new HashMap<>();
+            scoreData.put("period", String.valueOf(period));
+
+            // Gesture Score 조회
+            Optional<GestureData> gestureData = gestureRepository.findByPracticeId(p.getId());
+            scoreData.put("gestureScore", gestureData.map(GestureData::getGestureScore).orElse(0));
+
+            // Eye Contact Score 조회
+            Optional<EyeData> eyeData = eyeRepository.findByPracticeId(p.getId());
+            scoreData.put("eyeContactScore", eyeData.map(EyeData::getEyecontactScore).orElse(0));
+
+            // Cosine Similarity (Script Similarity) 조회
+            Double cosineSimilarity = p.getScriptSimilarity();
+            scoreData.put("cosineSimilarity", cosineSimilarity != null ? cosineSimilarity.intValue() : 0);
+
+            // STT Score 조회
+            Optional<SttData> sttData = sttRepository.findByPracticeId(p.getId());
+            Double fluencyScore = sttData.map(SttData::getFluencyScore).orElse(0.0);
+            scoreData.put("sttScore", fluencyScore.intValue());
+
+            scoreList.add(scoreData);
+            period++;
+        }
+
+        // 5. 결과 구성
+        Map<String, Object> result = new HashMap<>();
+        result.put("presentationId", presentationId);
+        result.put("score", scoreList);
+
+        return result;
     }
 }
