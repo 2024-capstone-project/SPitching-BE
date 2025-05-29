@@ -15,4 +15,7 @@ public interface PracticeRepository extends JpaRepository <Practice, Long> {
 
     // 특정 발표의 연습 개수 조회
     Integer countByPresentationId(Long presentationId);
+
+    List<Practice> findByPresentationIdOrderByCreatedAtAsc(Long presentationId);
+
 }
