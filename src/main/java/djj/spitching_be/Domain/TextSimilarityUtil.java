@@ -190,7 +190,8 @@ public class TextSimilarityUtil {
         double similarity = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
         log.debug("Calculated similarity: {}", similarity);
 
-        return similarity;
+        // 백분율로 변환하여 반환 (0~100)
+        return similarity * 100;
     }
 
     /**
@@ -213,7 +214,8 @@ public class TextSimilarityUtil {
             return 0.0;
         }
 
-        return (double) intersection.size() / union.size();
+        // 백분율로 변환하여 반환 (0~100)
+        return (double) intersection.size() / union.size() * 100;
     }
 
     /**
@@ -224,7 +226,8 @@ public class TextSimilarityUtil {
         double jaccardSim = calculateJaccardSimilarity(text1, text2);
 
         // 코사인 유사도에 더 높은 가중치 (0.7:0.3)
-        return 0.7 * cosineSim + 0.3 * jaccardSim;
+        // 백분율로 변환하여 반환 (0~100)
+        return (0.7 * cosineSim + 0.3 * jaccardSim) * 100;
     }
 
     /**
