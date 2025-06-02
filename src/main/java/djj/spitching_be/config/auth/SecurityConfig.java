@@ -96,7 +96,7 @@ public class SecurityConfig {
                                                         "; Path=/; Domain=spitching.store; Max-Age=21600; Secure; HttpOnly; SameSite=None");
                                     }
 
-                                    response.sendRedirect("https://www.spitching.store/");;
+                                    response.sendRedirect("https://www.spitching.store/dashboard");;
                                 })
                 )
                 // 로그아웃
