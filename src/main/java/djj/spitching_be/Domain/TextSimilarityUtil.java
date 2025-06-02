@@ -183,15 +183,15 @@ public class TextSimilarityUtil {
             norm2 += Math.pow(weight2, 2);
         }
 
+        // 0으로 나누기 방지
         if (norm1 == 0 || norm2 == 0) {
             return 0.0;
         }
 
         double similarity = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
-        log.debug("Calculated similarity: {}", similarity);
 
         // 백분율로 변환하여 반환 (0~100)
-        return similarity * 100;
+        return Math.round(similarity * 100 * 100.0) / 100.0; // 소수점 둘째자리까지
     }
 
     /**
@@ -215,15 +215,16 @@ public class TextSimilarityUtil {
         }
 
         // 백분율로 변환하여 반환 (0~100)
-        return (double) intersection.size() / union.size() * 100;
+        double result = (double) intersection.size() / union.size() * 100;
+        return Math.round(result * 100.0) / 100.0; // 소수점 둘째자리까지
     }
 
     /**
      * 종합 유사도 계산 (코사인과 Jaccard의 가중평균)
      */
     public double calculateCombinedSimilarity(String text1, String text2) {
-        double cosineSim = calculateCosineSimilarity(text1, text2);
-        double jaccardSim = calculateJaccardSimilarity(text1, text2);
+        double cosineSim = calculateCosineSimilarity(text1, text2) / 100; // 0-1 범위로 변환
+        double jaccardSim = calculateJaccardSimilarity(text1, text2) / 100; // 0-1 범위로 변환
 
         // 코사인 유사도에 더 높은 가중치 (0.7:0.3)
         // 백분율로 변환하여 반환 (0~100)
