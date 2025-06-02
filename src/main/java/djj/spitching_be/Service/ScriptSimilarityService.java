@@ -148,16 +148,16 @@ public class ScriptSimilarityService {
             double similarity = textSimilarityUtil.calculateCosineSimilarity(completeScript, transcribedText);
             log.info("✅ [STEP 8] 유사도 계산 완료 - raw similarity: {}", similarity);
 
-            // 🔥 유사도 검증
+            // 🔥 유사도 검증 (백분율 기준으로 수정)
             if (Double.isNaN(similarity)) {
                 log.error("❌ [STEP 8-1] 유사도 값이 NaN: {}", similarity);
                 similarity = 0.0;
             } else if (similarity < 0) {
                 log.error("❌ [STEP 8-2] 유사도 값이 음수: {}", similarity);
                 similarity = 0.0;
-            } else if (similarity > 1.0) {
-                log.warn("⚠️ [STEP 8-3] 유사도 값 > 1.0: {}", similarity);
-                similarity = 1.0;
+            } else if (similarity > 100.0) {
+                log.warn("⚠️ [STEP 8-3] 유사도 값 > 100.0: {}", similarity);
+                similarity = 100.0;
             }
             log.info("✅ [STEP 8-4] 유사도 검증 완료 - final similarity: {}", similarity);
 
