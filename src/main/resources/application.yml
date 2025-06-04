@@ -46,7 +46,7 @@ server:
       protocol-header: X-Forwarded-Proto
 openai:
   model: gpt-4o
-  secret-key: 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
+  secret-key: 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
 
 cloud:
   aws:
