@@ -51,8 +51,8 @@ openai:
 cloud:
   aws:
     credentials:
-      access-key: AKIAWOOXT3JR54VR77VJ
-      secret-key: 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
+      access-key: AKIAWOOXT3JRQAIDXG2O
+      secret-key: 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
     region:
       static: ap-northeast-2
     s3:
