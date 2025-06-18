@@ -1,0 +1,72 @@
+spring:
+  datasource:
+    url: ${RDS_URL}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: https://api.spitching.store/login/oauth2/code/google
+            client-id: ${OAUTH_CLIENT}
+            client-secret: ${OAUTH_REST}
+            scope:
+              - email
+              - profile
+              - openid
+    require-ssl: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+    session:
+      cookie:
+        same-site: none
+        secure: true
+        domain : spitching.store
+        max-age: 21600s
+        timeout: 21600s
+
+server:
+  ssl:
+    enabled: false
+  forward-headers-strategy: NATIVE
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+
+openai:
+  model: gpt-4o
+  secret-key: ${AI_KEY}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: djj-github-actions-s3-bucket
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    djj.spitching_be.config.auth: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
