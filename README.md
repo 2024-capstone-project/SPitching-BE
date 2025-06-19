@@ -2,8 +2,8 @@
 
 ## 👩🏻‍💻 SPitching Backend
 
-> AI 발표 트레이너 웹 백엔드 – 시선 추적, 제스처 분석, 발표 유창성 피드백까지!
-Webhook 기반 AI 피드백 분석 데이터 처리, AWS 기반 API 서버 배포 및 CI/CD, 챗봇 기능 & 대본 유사도 측정 알고리즘
+> AI 발표 트레이너 웹 백엔드 – 시선 추적, 제스처 분석, 발표 유창성 피드백까지! <br>
+Webhook 기반 AI 피드백 분석 데이터 처리, AWS 기반 API 서버 배포 및 CI/CD, 챗봇 기능 & 대본 유사도 측정 알고리즘<br>
 `JAVA + Spring&SpringBoot + MySQL + Postman + AWS + IntelliJ`
 > 
 
@@ -114,6 +114,6 @@ java -jar build/libs/spitching-be-0.0.1-SNAPSHOT.jar
 
 ## **🔗 Related Links**
 
-- 🧠 [AI 서버 리드미](https://github.com/2024-capstone-project/SPitching-AI_SERVER.git)
+- 🧠 [AI 리드미](https://github.com/2024-capstone-project/SPitching-AI_SERVER.git)
 - ⛳ [프론트엔드 리드미](https://github.com/2024-capstone-project/SPitching-FE.git)
 - 📋 시제품 사용설명서
