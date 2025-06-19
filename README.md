@@ -1,4 +1,4 @@
-# 🗣️ 시선추적, 제스처 인식, STT 기반 AI 발표 트레이너 스피칭, SPitching!
+# 🗣️ 시선추적, 제스처 인식, STT 기반 AI 발표 트레이너 SPitching!
 
 ## 👩🏻‍💻 SPitching Backend
 
@@ -114,6 +114,6 @@ java -jar build/libs/spitching-be-0.0.1-SNAPSHOT.jar
 
 ## **🔗 Related Links**
 
-- 🧠 [AI 리드미](https://github.com/2024-capstone-project/SPitching-AI_SERVER.git)
+- 🧠 [AI 서버 리드미](https://github.com/2024-capstone-project/SPitching-AI_SERVER.git)
 - ⛳ [프론트엔드 리드미](https://github.com/2024-capstone-project/SPitching-FE.git)
 - 📋 시제품 사용설명서
